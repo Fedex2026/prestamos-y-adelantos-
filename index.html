@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Préstamos y Adelantos</title>
+
+<style>
+body {
+  font-family: Arial;
+  background: #0f172a;
+  color: white;
+  text-align: center;
+}
+
+.card {
+  background: #1e293b;
+  padding: 20px;
+  margin: 10px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+input, button {
+  padding: 10px;
+  margin: 5px;
+  border-radius: 5px;
+  border: none;
+}
+
+button {
+  background: #22c55e;
+  color: white;
+  cursor: pointer;
+}
+
+.hidden {
+  display: none;
+}
+</style>
+</head>
+
+<body>
+
+<h1>PRÉSTAMOS Y ADELANTOS</h1>
+
+<div id="lista"></div>
+
+<div id="login" class="hidden">
+  <h2 id="nombre"></h2>
+  <input type="password" id="pass" placeholder="Contraseña">
+  <br>
+  <button onclick="entrar()">Entrar</button>
+</div>
+
+<div id="panel" class="hidden">
+  <h2 id="titulo"></h2>
+
+  <p>Sueldo semana: $<span id="sueldo"></span></p>
+  <p>Adelantos: $<span id="adelantos"></span></p>
+  <p>Pago deuda: $<span id="pago"></span></p>
+  <p>Deuda total: $<span id="deuda"></span></p>
+  <p><b>Te queda: $<span id="restante"></span></b></p>
+
+  <div id="adminPanel" class="hidden">
+    <h3>ADMIN</h3>
+
+    <input id="nuevoSueldo" placeholder="Nuevo sueldo">
+    <button onclick="setSueldo()">Actualizar sueldo</button>
+
+    <input id="montoPrestamo" placeholder="Préstamo">
+    <button onclick="prestamo()">Agregar préstamo</button>
+
+    <input id="montoAdelanto" placeholder="Adelanto">
+    <button onclick="adelanto()">Agregar adelanto</button>
+
+    <input id="pagoDeuda" placeholder="Pago deuda">
+    <button onclick="pagar()">Registrar pago</button>
+
+    <button onclick="interes()">Aplicar 10% interés</button>
+  </div>
+
+  <br>
+  <button onclick="salir()">Salir</button>
+</div>
+
+<script>
+let personas = [
+  {
+    nombre: "Juan",
+    pass: "1234",
+    admin: "admin",
+    sueldo: 4000,
+    adelantos: 500,
+    pago: 300,
+    deuda: 2000
+  },
+  {
+    nombre: "Luis",
+    pass: "1111",
+    admin: "admin",
+    sueldo: 3500,
+    adelantos: 300,
+    pago: 200,
+    deuda: 1500
+  }
+];
+
+let actual = null;
+let esAdmin = false;
+
+function render() {
+  let lista = document.getElementById("lista");
+  lista.innerHTML = "";
+
+  personas.forEach((p, i) => {
+    lista.innerHTML += <div class="card" onclick="abrir(${i})">${p.nombre}</div>;
+  });
+}
+
+function abrir(i) {
+  actual = i;
+  document.getElementById("login").classList.remove("hidden");
+  document.getElementById("nombre").innerText = personas[i].nombre;
+}
+
+function entrar() {
+  let pass = document.getElementById("pass").value;
+  let p = personas[actual];
+
+  if (pass === p.pass) {
+    esAdmin = false;
+  } else if (pass === p.admin) {
+    esAdmin = true;
+  } else {
+    alert("Contraseña incorrecta");
+    return;
+  }
+
+  document.getElementById("login").classList.add("hidden");
+  document.getElementById("panel").classList.remove("hidden");
+
+  if (esAdmin) {
+    document.getElementById("adminPanel").classList.remove("hidden");
+  }
+
+  actualizar();
+}
+
+function actualizar() {
+  let p = personas[actual];
+  let restante = p.sueldo - p.adelantos - p.pago;
+
+  document.getElementById("titulo").innerText = p.nombre;
+  document.getElementById("sueldo").innerText = p.sueldo;
+  document.getElementById("adelantos").innerText = p.adelantos;
+  document.getElementById("pago").innerText = p.pago;
+  document.getElementById("deuda").innerText = p.deuda;
+  document.getElementById("restante").innerText = restante;
+}
+
+function setSueldo() {
+  personas[actual].sueldo = parseFloat(nuevoSueldo.value);
+  actualizar();
+}
+
+function prestamo() {
+  let m = parseFloat(montoPrestamo.value);
+  personas[actual].deuda += m;
+  actualizar();
+}
+
+function adelanto() {
+  let m = parseFloat(montoAdelanto.value);
+  personas[actual].adelantos += m;
+  actualizar();
+}
+
+function pagar() {
+  let m = parseFloat(pagoDeuda.value);
+  personas[actual].deuda -= m;
+  personas[actual].pago += m;
+  actualizar();
+}
+
+function interes() {
+  personas[actual].deuda *= 1.10;
+  actualizar();
+}
+
+function salir() {
+  document.getElementById("panel").classList.add("hidden");
+  document.getElementById("login").classList.add("hidden");
+}
+
+render();
+</script>
+
+</body>
+</html>
