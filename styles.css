@@ -149,6 +149,14 @@ body{
   color:#dce7ff;
   border:1px solid transparent;
   background:transparent;
+  cursor:pointer;
+  transition:.2s ease;
+  user-select:none;
+}
+
+.menu-item:hover{
+  background:rgba(255,255,255,.03);
+  border-color:rgba(255,255,255,.08);
 }
 
 .menu-item.active{
@@ -519,8 +527,12 @@ body{
 .pink-card{background:linear-gradient(180deg,#db3fa7,#b22d86)}
 
 .activity-list{
-  display:grid;
+  display:flex;
+  flex-direction:column;
   gap:12px;
+  max-height:60vh;
+  overflow-y:auto;
+  padding-right:4px;
 }
 
 .activity-item{
@@ -667,6 +679,12 @@ body{
   width:min(520px,100%);
   border-radius:24px;
   padding:24px;
+}
+
+.history-modal-card{
+  width:min(900px,95vw);
+  max-height:85vh;
+  overflow-y:auto;
 }
 
 .modal-card h3{
