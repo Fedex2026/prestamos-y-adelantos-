@@ -87,6 +87,7 @@
           </div>
 
           <div class="dashboard-grid">
+            <!-- RESUMEN -->
             <div class="box">
               <div class="box-title">🛡 RESUMEN RÁPIDO</div>
 
@@ -168,6 +169,7 @@
               </div>
             </div>
 
+            <!-- ACCIONES -->
             <div class="box">
               <div class="box-title">⚙ ACCIONES RÁPIDAS</div>
 
@@ -184,7 +186,7 @@
 
                 <button class="action-card blue-card" id="payDebtBtn">
                   <span>Registrar pago</span>
-                  <small>Pago aplicado a deuda</small>
+                  <small>Bajar deuda del préstamo</small>
                 </button>
 
                 <button class="action-card cyan-card hidden admin-only" id="updateSalaryBtn">
@@ -209,6 +211,7 @@
               </div>
             </div>
 
+            <!-- HISTORIAL -->
             <div class="box">
               <div class="box-title">🕘 HISTORIAL</div>
               <div class="summary-footer">
@@ -237,24 +240,24 @@
         <section class="panel hidden" id="solicitudesPanel">
           <div class="panel-header">
             <h2>SOLICITUDES</h2>
-            <p>Consulta rápida de adelantos, pagos y préstamos.</p>
+            <p>Aquí puedes abrir las acciones rápidas para adelantos, préstamos y pagos.</p>
           </div>
 
           <div class="dashboard-grid">
             <div class="box">
-              <div class="box-title">Acciones disponibles</div>
+              <div class="box-title">Solicitudes disponibles</div>
               <div class="actions-grid">
-                <button class="action-card green-card" id="requestAdvanceBtnClone">
+                <button class="action-card green-card" id="solAdvanceBtn">
                   <span>Solicitar adelanto</span>
                   <small>Registrar adelanto semanal</small>
                 </button>
 
-                <button class="action-card purple-card" id="requestLoanBtnClone">
+                <button class="action-card purple-card" id="solLoanBtn">
                   <span>Solicitar préstamo</span>
-                  <small>Registrar préstamo</small>
+                  <small>Registrar préstamo acumulado</small>
                 </button>
 
-                <button class="action-card blue-card" id="payDebtBtnClone">
+                <button class="action-card blue-card" id="solPayBtn">
                   <span>Registrar pago</span>
                   <small>Bajar deuda del préstamo</small>
                 </button>
@@ -267,15 +270,13 @@
         <section class="panel hidden" id="reportesPanel">
           <div class="panel-header">
             <h2>REPORTES</h2>
-            <p>Vista rápida de la situación financiera actual.</p>
+            <p>Vista resumida del sistema.</p>
           </div>
 
           <div class="dashboard-grid">
             <div class="box">
-              <div class="box-title">Resumen</div>
-              <div class="summary-list">
-                <div class="summary-row"><div class="summary-label">Aquí después podemos meter reportes más avanzados.</div></div>
-              </div>
+              <div class="box-title">Resumen rápido</div>
+              <p>Aquí puedes agregar después gráficas, reportes por semana o exportaciones.</p>
             </div>
           </div>
         </section>
@@ -284,15 +285,13 @@
         <section class="panel hidden" id="configPanel">
           <div class="panel-header">
             <h2>CONFIGURACIÓN</h2>
-            <p>Ajustes del sistema.</p>
+            <p>Sección reservada para ajustes del sistema.</p>
           </div>
 
           <div class="dashboard-grid">
             <div class="box">
-              <div class="box-title">Configuración básica</div>
-              <div class="summary-list">
-                <div class="summary-row"><div class="summary-label">Más adelante aquí metemos opciones extras.</div></div>
-              </div>
+              <div class="box-title">Opciones</div>
+              <p>Aquí después puedes poner configuraciones generales.</p>
             </div>
           </div>
         </section>
