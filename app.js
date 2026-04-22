@@ -821,7 +821,7 @@ onAuthStateChanged(auth, async (user) => {
     amountsVisible = false;
 
     clearSummary();
-    activityList.innerHTML = <div class="empty-state">Inicia sesión para ver actividad.</div>;
+    activityList.innerHTML = `<div class="empty-state">Inicia sesión para ver actividad.</div>`;
     return;
   }
 
