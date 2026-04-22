@@ -58,6 +58,10 @@ const publicPanel = document.getElementById("publicPanel");
 const personalPanel = document.getElementById("personalPanel");
 const adminPanel = document.getElementById("adminPanel");
 
+const solicitudesPanel = document.getElementById("solicitudesPanel");
+const reportesPanel = document.getElementById("reportesPanel");
+const configPanel = document.getElementById("configPanel");
+
 const profilesGrid = document.getElementById("profilesGrid");
 const adminOperatorsList = document.getElementById("adminOperatorsList");
 const searchOperatorInput = document.getElementById("searchOperatorInput");
@@ -70,10 +74,12 @@ const logoutBtn = document.getElementById("logoutBtn");
 const registerModal = document.getElementById("registerModal");
 const loginModal = document.getElementById("loginModal");
 const actionModal = document.getElementById("actionModal");
+const historyModal = document.getElementById("historyModal");
 
 const closeRegisterBtn = document.getElementById("closeRegisterBtn");
 const closeLoginBtn = document.getElementById("closeLoginBtn");
 const closeActionBtn = document.getElementById("closeActionBtn");
+const closeHistoryBtn = document.getElementById("closeHistoryBtn");
 
 const confirmRegisterBtn = document.getElementById("confirmRegisterBtn");
 const confirmLoginBtn = document.getElementById("confirmLoginBtn");
@@ -112,6 +118,7 @@ const lastUpdatedText = document.getElementById("lastUpdatedText");
 const activityList = document.getElementById("activityList");
 
 const toggleAmountsBtn = document.getElementById("toggleAmountsBtn");
+const openHistoryBtn = document.getElementById("openHistoryBtn");
 const requestAdvanceBtn = document.getElementById("requestAdvanceBtn");
 const requestLoanBtn = document.getElementById("requestLoanBtn");
 const payDebtBtn = document.getElementById("payDebtBtn");
@@ -119,6 +126,25 @@ const updateSalaryBtn = document.getElementById("updateSalaryBtn");
 const applyInterestBtn = document.getElementById("applyInterestBtn");
 const markReviewedBtn = document.getElementById("markReviewedBtn");
 const closeWeekBtn = document.getElementById("closeWeekBtn");
+
+/* menú lateral */
+const btnInicio = document.getElementById("btnInicio");
+const btnPanel = document.getElementById("btnPanel");
+const btnHistorial = document.getElementById("btnHistorial");
+const btnSolicitudes = document.getElementById("btnSolicitudes");
+const btnPersonas = document.getElementById("btnPersonas");
+const btnReportes = document.getElementById("btnReportes");
+const btnConfig = document.getElementById("btnConfig");
+
+const menuButtons = [
+  btnInicio,
+  btnPanel,
+  btnHistorial,
+  btnSolicitudes,
+  btnPersonas,
+  btnReportes,
+  btnConfig
+].filter(Boolean);
 
 /* =========================================================
    STATE
@@ -175,6 +201,20 @@ function openModal(el) {
 
 function closeModal(el) {
   hide(el);
+}
+
+function hideAllMainPanels() {
+  hide(publicPanel);
+  hide(personalPanel);
+  hide(adminPanel);
+  hide(solicitudesPanel);
+  hide(reportesPanel);
+  hide(configPanel);
+}
+
+function setActiveMenu(activeBtn) {
+  menuButtons.forEach((btn) => btn.classList.remove("active"));
+  if (activeBtn) activeBtn.classList.add("active");
 }
 
 function setClock() {
@@ -519,9 +559,10 @@ async function loadCurrentPanel(uid) {
         : "🔒 Sesión segura";
     }
 
-    hide(publicPanel);
+    hideAllMainPanels();
     show(personalPanel);
     show(logoutBtn);
+    setActiveMenu(btnPanel);
     setSummary(currentFinanceDoc);
 
     document.querySelectorAll(".admin-only").forEach((el) => {
@@ -568,7 +609,7 @@ async function loadActivity(uid) {
 
     activityList.innerHTML = "";
 
-    movements.slice(0, 20).forEach((mov) => {
+    movements.forEach((mov) => {
       const div = document.createElement("div");
       div.className = "activity-item";
       div.innerHTML = `
@@ -704,9 +745,10 @@ async function openAdminView(uid) {
     if (panelSubtitle) panelSubtitle.textContent = `Operador: ${user.email || ""}`;
     currentFinanceDoc = fin;
 
-    hide(publicPanel);
+    hideAllMainPanels();
     show(personalPanel);
     show(logoutBtn);
+    setActiveMenu(btnPanel);
 
     setSummary(fin);
     await loadActivity(uid);
@@ -996,6 +1038,80 @@ async function saveAction() {
 }
 
 /* =========================================================
+   NAVEGACIÓN LATERAL
+========================================================= */
+if (btnInicio) {
+  btnInicio.addEventListener("click", async () => {
+    hideAllMainPanels();
+    show(publicPanel);
+    setActiveMenu(btnInicio);
+    adminViewingUid = null;
+    try {
+      await loadProfiles();
+    } catch (error) {
+      console.error("Error cargando inicio:", error);
+    }
+  });
+}
+
+if (btnPanel) {
+  btnPanel.addEventListener("click", async () => {
+    if (!currentUser?.uid) return;
+    adminViewingUid = null;
+    await loadCurrentPanel(currentUser.uid);
+    setActiveMenu(btnPanel);
+  });
+}
+
+if (btnHistorial) {
+  btnHistorial.addEventListener("click", async () => {
+    const targetUid = adminViewingUid || currentUser?.uid;
+    if (!targetUid) return;
+
+    await loadActivity(targetUid);
+    openModal(historyModal);
+    setActiveMenu(btnHistorial);
+  });
+}
+
+if (btnSolicitudes) {
+  btnSolicitudes.addEventListener("click", () => {
+    if (!currentUser?.uid) return;
+    hideAllMainPanels();
+    show(solicitudesPanel);
+    setActiveMenu(btnSolicitudes);
+  });
+}
+
+if (btnPersonas) {
+  btnPersonas.addEventListener("click", async () => {
+    if (currentUserDoc?.rol !== "admin") return;
+    hideAllMainPanels();
+    show(adminPanel);
+    setActiveMenu(btnPersonas);
+    await loadAdminOperators();
+  });
+}
+
+if (btnReportes) {
+  btnReportes.addEventListener("click", () => {
+    if (!currentUser?.uid) return;
+    hideAllMainPanels();
+    show(reportesPanel);
+    setActiveMenu(btnReportes);
+  });
+}
+
+if (btnConfig) {
+  btnConfig.addEventListener("click", () => {
+    if (!currentUser?.uid) return;
+    hideAllMainPanels();
+    show(configPanel);
+    setActiveMenu(btnConfig);
+  });
+}
+
+/* =========================================================
    AUTH STATE
 ========================================================= */
 onAuthStateChanged(auth, async (user) => {
@@ -1007,10 +1123,10 @@ onAuthStateChanged(auth, async (user) => {
     if (panelSubtitle) panelSubtitle.textContent = "Vista general de tu información financiera";
     if (secureSessionText) secureSessionText.textContent = "🔒 Sesión cerrada";
 
+    hideAllMainPanels();
     show(publicPanel);
-    hide(personalPanel);
-    hide(adminPanel);
     hide(logoutBtn);
+    setActiveMenu(btnInicio);
 
     document.querySelectorAll(".admin-only").forEach((el) => hide(el));
 
@@ -1036,6 +1152,7 @@ onAuthStateChanged(auth, async (user) => {
 
   try {
     await loadCurrentPanel(user.uid);
+    setActiveMenu(btnPanel);
   } catch (error) {
     console.error("Error cargando panel actual:", error);
   }
@@ -1073,6 +1190,10 @@ if (closeActionBtn) {
   closeActionBtn.addEventListener("click", () => closeModal(actionModal));
 }
 
+if (closeHistoryBtn) {
+  closeHistoryBtn.addEventListener("click", () => closeModal(historyModal));
+}
+
 if (confirmRegisterBtn) {
   confirmRegisterBtn.addEventListener("click", registerOperator);
 }
@@ -1087,6 +1208,15 @@ if (confirmActionBtn) {
 
 if (logoutBtn) {
   logoutBtn.addEventListener("click", logoutUser);
+}
+
+if (openHistoryBtn) {
+  openHistoryBtn.addEventListener("click", async () => {
+    const targetUid = adminViewingUid || currentUser?.uid;
+    if (!targetUid) return;
+    await loadActivity(targetUid);
+    openModal(historyModal);
+  });
 }
 
 if (requestAdvanceBtn) {
@@ -1154,6 +1284,7 @@ if (searchOperatorInput) {
    INIT
 ========================================================= */
 try {
+  setActiveMenu(btnInicio);
   await loadProfiles();
 } catch (error) {
   console.error("Error al iniciar app:", error);
