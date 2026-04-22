@@ -220,7 +220,7 @@ function setSummary(fin) {
   mRestante.textContent = renderMaskedOrValue(calcRestante(fin));
   mSemanaPagada.textContent = fin.semanaMarcada ? "Sí" : "No";
   mSemanaCotejada.textContent = fin.semanaCotejada ? "Sí" : "No";
-  lastUpdatedText.textContent = Actualizado: ${new Date().toLocaleString("es-MX")};
+  lastUpdatedText.textContent = `Actualizado: ${new Date().toLocaleString("es-MX")}`;
 }
 
 function resetActionFields() {
@@ -243,7 +243,7 @@ function escapeHtml(str = "") {
    PERFIL PÚBLICO
 ========================================================= */
 async function loadProfiles() {
-  profilesGrid.innerHTML = `<div class="empty-state">Cargando operadores...</div>○;
+  profilesGrid.innerHTML = `<div class="empty-state">Cargando operadores...</div>`;
 
   const snap = await getDocs(collection(db, "usuarios"));
   const operadores = [];
