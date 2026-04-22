@@ -34,7 +34,7 @@ const firebaseConfig = {
 };
 
 /* =========================================================
-   CORREOS ADMIN
+   ADMIN
 ========================================================= */
 const ADMIN_EMAILS = [
   "gruasmetro1@gmail.com"
@@ -156,7 +156,7 @@ function getInitials(name = "") {
     .split(" ")
     .filter(Boolean)
     .slice(0, 2)
-    .map(w => w[0].toUpperCase())
+    .map((w) => w[0].toUpperCase())
     .join("");
 }
 
@@ -248,6 +248,72 @@ function escapeHtml(str = "") {
     .replaceAll("'", "&#039;");
 }
 
+async function ensureUserDoc(user) {
+  if (!user) return null;
+
+  const userRef = doc(db, "usuarios", user.uid);
+  let userSnap = await getDoc(userRef);
+
+  if (!userSnap.exists()) {
+    const safeName = user.displayName || user.email?.split("@")[0] || "Usuario";
+
+    await setDoc(userRef, {
+      uid: user.uid,
+      nombre: safeName,
+      email: user.email || "",
+      rol: isAdmin(user.email || "") ? "admin" : "operador",
+      createdAt: serverTimestamp()
+    });
+
+    userSnap = await getDoc(userRef);
+  } else {
+    const current = userSnap.data();
+    const patch = {};
+
+    if (!current.uid) patch.uid = user.uid;
+    if (!current.nombre) patch.nombre = user.displayName || user.email?.split("@")[0] || "Usuario";
+    if (!current.email) patch.email = user.email || "";
+    if (!current.rol) patch.rol = isAdmin(user.email || "") ? "admin" : "operador";
+
+    if (Object.keys(patch).length) {
+      await updateDoc(userRef, patch);
+      userSnap = await getDoc(userRef);
+    }
+  }
+
+  const data = userSnap.data();
+
+  if (isAdmin(user.email || "") && data.rol !== "admin") {
+    await updateDoc(userRef, { rol: "admin", email: user.email || data.email || "" });
+    userSnap = await getDoc(userRef);
+  }
+
+  return userSnap.data();
+}
+
+async function ensureFinanceDoc(uid) {
+  const finRef = doc(db, "finanzas", uid);
+  let finSnap = await getDoc(finRef);
+
+  if (!finSnap.exists()) {
+    await setDoc(finRef, {
+      uid,
+      sueldo: 0,
+      adelantos: 0,
+      pago: 0,
+      deuda: 0,
+      semanaMarcada: false,
+      semanaCotejada: false,
+      semanaActual: getCurrentWeekLabel(),
+      updatedAt: serverTimestamp()
+    });
+
+    finSnap = await getDoc(finRef);
+  }
+
+  return finSnap.data();
+}
+
 /* =========================================================
    PERFIL PÚBLICO
 ========================================================= */
@@ -260,7 +326,7 @@ async function loadProfiles() {
     const snap = await getDocs(collection(db, "usuarios"));
     const operadores = [];
 
-    snap.forEach(docSnap => {
+    snap.forEach((docSnap) => {
       const data = docSnap.data();
       if (data.rol === "operador") operadores.push(data);
     });
@@ -419,36 +485,16 @@ async function logoutUser() {
 ========================================================= */
 async function loadCurrentPanel(uid) {
   try {
-    const userRef = doc(db, "usuarios", uid);
-    const finRef = doc(db, "finanzas", uid);
+    const authUser = auth.currentUser;
+    if (!authUser) return;
 
-    const userSnap = await getDoc(userRef);
-    const finSnap = await getDoc(finRef);
+    currentUserDoc = await ensureUserDoc(authUser);
+    currentFinanceDoc = await ensureFinanceDoc(uid);
 
-    if (!userSnap.exists()) {
-      alert("No se encontró el usuario en Firestore.");
+    if (!currentUserDoc || !currentFinanceDoc) {
+      alert("No se pudo cargar el panel.");
       return;
     }
-
-    if (!finSnap.exists()) {
-      await setDoc(finRef, {
-        uid,
-        sueldo: 0,
-        adelantos: 0,
-        pago: 0,
-        deuda: 0,
-        semanaMarcada: false,
-        semanaCotejada: false,
-        semanaActual: getCurrentWeekLabel(),
-        updatedAt: serverTimestamp()
-      });
-    }
-
-    const newUserSnap = await getDoc(userRef);
-    const newFinSnap = await getDoc(finRef);
-
-    currentUserDoc = newUserSnap.data();
-    currentFinanceDoc = newFinSnap.data();
 
     if (sessionStatus) {
       sessionStatus.textContent = currentUserDoc.rol === "admin"
@@ -457,7 +503,7 @@ async function loadCurrentPanel(uid) {
     }
 
     if (panelTitle) {
-      panelTitle.textContent = `PANEL DE ${currentUserDoc.nombre.toUpperCase()}`;
+      panelTitle.textContent = `PANEL DE ${String(currentUserDoc.nombre || "USUARIO").toUpperCase()}`;
     }
 
     if (panelSubtitle) {
@@ -477,7 +523,7 @@ async function loadCurrentPanel(uid) {
     show(logoutBtn);
     setSummary(currentFinanceDoc);
 
-    document.querySelectorAll(".admin-only").forEach(el => {
+    document.querySelectorAll(".admin-only").forEach((el) => {
       if (currentUserDoc.rol === "admin") show(el);
       else hide(el);
     });
@@ -506,7 +552,7 @@ async function loadActivity(uid) {
     const snap = await getDocs(qRef);
 
     const movements = [];
-    snap.forEach(docSnap => movements.push({ id: docSnap.id, ...docSnap.data() }));
+    snap.forEach((docSnap) => movements.push({ id: docSnap.id, ...docSnap.data() }));
 
     movements.sort((a, b) => {
       const at = a.createdAt?.seconds || 0;
@@ -521,7 +567,7 @@ async function loadActivity(uid) {
 
     activityList.innerHTML = "";
 
-    movements.slice(0, 10).forEach(mov => {
+    movements.slice(0, 10).forEach((mov) => {
       const div = document.createElement("div");
       div.className = "activity-item";
       div.innerHTML = `
@@ -562,13 +608,13 @@ async function loadAdminOperators() {
     const snap = await getDocs(collection(db, "usuarios"));
     const users = [];
 
-    snap.forEach(docSnap => {
+    snap.forEach((docSnap) => {
       const data = docSnap.data();
       if (data.rol === "operador") users.push(data);
     });
 
     const filter = searchOperatorInput?.value.trim().toLowerCase() || "";
-    const filtered = users.filter(u =>
+    const filtered = users.filter((u) =>
       (u.nombre || "").toLowerCase().includes(filter) ||
       (u.email || "").toLowerCase().includes(filter)
     );
@@ -581,8 +627,7 @@ async function loadAdminOperators() {
     adminOperatorsList.innerHTML = "";
 
     for (const user of filtered) {
-      const finSnap = await getDoc(doc(db, "finanzas", user.uid));
-      const fin = finSnap.exists() ? finSnap.data() : null;
+      const finData = await ensureFinanceDoc(user.uid);
 
       const card = document.createElement("div");
       card.className = "operator-card-admin";
@@ -590,9 +635,9 @@ async function loadAdminOperators() {
         <div class="operator-info">
           <h3>${escapeHtml(user.nombre)}</h3>
           <p>${escapeHtml(user.email)}</p>
-          <p>Sueldo: ${fin ? money(fin.sueldo || 0) : "$0.00"}</p>
-          <p>Deuda: ${fin ? money(fin.deuda || 0) : "$0.00"}</p>
-          <p>Semana marcada: ${fin?.semanaMarcada ? "Sí" : "No"} / Cotejada: ${fin?.semanaCotejada ? "Sí" : "No"}</p>
+          <p>Sueldo: ${money(finData.sueldo || 0)}</p>
+          <p>Deuda: ${money(finData.deuda || 0)}</p>
+          <p>Semana marcada: ${finData?.semanaMarcada ? "Sí" : "No"} / Cotejada: ${finData?.semanaCotejada ? "Sí" : "No"}</p>
         </div>
         <div class="operator-actions">
           <button class="btn btn-login" data-action="open" data-uid="${user.uid}">Abrir panel</button>
@@ -605,7 +650,7 @@ async function loadAdminOperators() {
       adminOperatorsList.appendChild(card);
     }
 
-    adminOperatorsList.querySelectorAll("button").forEach(btn => {
+    adminOperatorsList.querySelectorAll("button").forEach((btn) => {
       btn.addEventListener("click", async () => {
         const uid = btn.dataset.uid;
         const action = btn.dataset.action;
@@ -642,31 +687,13 @@ async function loadAdminOperators() {
 async function openAdminView(uid) {
   try {
     const userSnap = await getDoc(doc(db, "usuarios", uid));
-    const finRef = doc(db, "finanzas", uid);
-    const finSnap = await getDoc(finRef);
-
     if (!userSnap.exists()) return;
 
-    if (!finSnap.exists()) {
-      await setDoc(finRef, {
-        uid,
-        sueldo: 0,
-        adelantos: 0,
-        pago: 0,
-        deuda: 0,
-        semanaMarcada: false,
-        semanaCotejada: false,
-        semanaActual: getCurrentWeekLabel(),
-        updatedAt: serverTimestamp()
-      });
-    }
-
-    const newFinSnap = await getDoc(finRef);
     const user = userSnap.data();
-    const fin = newFinSnap.data();
+    const fin = await ensureFinanceDoc(uid);
 
-    if (panelTitle) panelTitle.textContent = `ADMIN VIENDO: ${user.nombre.toUpperCase()}`;
-    if (panelSubtitle) panelSubtitle.textContent = `Operador: ${user.email}`;
+    if (panelTitle) panelTitle.textContent = `ADMIN VIENDO: ${String(user.nombre || "OPERADOR").toUpperCase()}`;
+    if (panelSubtitle) panelSubtitle.textContent = `Operador: ${user.email || ""}`;
     currentFinanceDoc = fin;
 
     hide(publicPanel);
@@ -940,7 +967,7 @@ onAuthStateChanged(auth, async (user) => {
     hide(adminPanel);
     hide(logoutBtn);
 
-    document.querySelectorAll(".admin-only").forEach(el => hide(el));
+    document.querySelectorAll(".admin-only").forEach((el) => hide(el));
 
     currentUserDoc = null;
     currentFinanceDoc = null;
@@ -951,6 +978,12 @@ onAuthStateChanged(auth, async (user) => {
 
     if (activityList) {
       activityList.innerHTML = `<div class="empty-state">Inicia sesión para ver actividad.</div>`;
+    }
+
+    try {
+      await loadProfiles();
+    } catch (error) {
+      console.error("Error recargando perfiles públicos:", error);
     }
 
     return;
