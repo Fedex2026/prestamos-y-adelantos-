@@ -1,219 +1,1374 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>Préstamos y Adelantos</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Préstamos y Adelantos</title>
+  <style>
+    :root{
+      --bg:#07111f;
+      --bg2:#0b1730;
+      --panel:#0d1b33;
+      --panel2:#101f3a;
+      --line:#1f335b;
+      --text:#f3f7ff;
+      --muted:#9eb0d1;
+      --green:#20d38a;
+      --green2:#00b894;
+      --purple:#8f56ff;
+      --blue:#2f8cff;
+      --orange:#ff9f43;
+      --red:#ff5d73;
+      --yellow:#f7c948;
+      --shadow:0 16px 40px rgba(0,0,0,.35);
+      --radius:18px;
+    }
 
-<style>
-body {
-  font-family: Arial;
-  background: #0f172a;
-  color: white;
-  text-align: center;
-}
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0}
+    body{
+      font-family: Inter, Arial, Helvetica, sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(32,211,138,.08), transparent 20%),
+        radial-gradient(circle at top right, rgba(143,86,255,.08), transparent 18%),
+        linear-gradient(180deg, #05101d 0%, #081425 35%, #07111f 100%);
+      min-height:100vh;
+    }
 
-h1 {
-  margin-top: 20px;
-}
+    .app{
+      max-width: 1450px;
+      margin: 0 auto;
+      padding: 20px;
+    }
 
-.container {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-}
+    .topbar{
+      display:grid;
+      grid-template-columns: 1.2fr auto auto auto;
+      gap:16px;
+      align-items:center;
+      margin-bottom:18px;
+    }
 
-.card {
-  background: #1e293b;
-  padding: 20px;
-  margin: 10px;
-  border-radius: 10px;
-  cursor: pointer;
-  width: 200px;
-  transition: 0.3s;
-}
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      background:linear-gradient(180deg, rgba(13,27,51,.95), rgba(8,20,37,.95));
+      border:1px solid var(--line);
+      border-radius:20px;
+      padding:16px 18px;
+      box-shadow:var(--shadow);
+    }
 
-.card:hover {
-  background: #334155;
-}
+    .brand-icon{
+      width:62px;height:62px;border-radius:18px;
+      display:grid;place-items:center;
+      background:linear-gradient(135deg, rgba(32,211,138,.15), rgba(47,140,255,.12));
+      border:1px solid rgba(32,211,138,.35);
+      color:var(--green);
+      font-size:34px;font-weight:800;
+      box-shadow: inset 0 0 25px rgba(32,211,138,.08);
+    }
 
-input, button {
-  padding: 10px;
-  margin: 5px;
-  border-radius: 5px;
-  border: none;
-}
+    .brand h1{
+      margin:0;
+      font-size:22px;
+      letter-spacing:.4px;
+    }
 
-button {
-  background: #22c55e;
-  color: white;
-  cursor: pointer;
-}
+    .brand h1 span{color:var(--green)}
+    .brand p{
+      margin:4px 0 0;
+      color:var(--muted);
+      font-size:14px;
+    }
 
-.hidden {
-  display: none;
-}
-</style>
+    .top-card{
+      background:linear-gradient(180deg, rgba(13,27,51,.95), rgba(8,20,37,.95));
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:16px 18px;
+      min-width:180px;
+      box-shadow:var(--shadow);
+    }
+
+    .top-card .label{
+      color:var(--muted);
+      font-size:13px;
+      margin-bottom:6px;
+    }
+
+    .top-card .value{
+      font-size:26px;
+      font-weight:800;
+    }
+
+    .layout{
+      display:grid;
+      grid-template-columns: 240px 1fr;
+      gap:18px;
+    }
+
+    .sidebar{
+      background:linear-gradient(180deg, rgba(10,24,46,.96), rgba(7,18,34,.98));
+      border:1px solid var(--line);
+      border-radius:22px;
+      padding:16px;
+      box-shadow:var(--shadow);
+      min-height:780px;
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+    }
+
+    .menu-title{
+      color:#d6e4ff;
+      font-size:14px;
+      font-weight:700;
+      opacity:.9;
+      margin:8px 0 0;
+    }
+
+    .menu-item{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding:13px 14px;
+      border-radius:14px;
+      color:#dce7ff;
+      background:transparent;
+      border:1px solid transparent;
+    }
+
+    .menu-item.active{
+      background:linear-gradient(90deg, rgba(32,211,138,.12), rgba(47,140,255,.06));
+      border-color:rgba(32,211,138,.35);
+      box-shadow: inset 0 0 20px rgba(32,211,138,.06);
+    }
+
+    .menu-icon{
+      width:24px;height:24px;border-radius:8px;
+      display:grid;place-items:center;
+      color:#9cc5ff;
+      font-size:18px;
+    }
+
+    .privacy-box{
+      margin-top:auto;
+      background:linear-gradient(180deg, rgba(11,28,52,.95), rgba(7,20,38,.95));
+      border:1px solid rgba(32,211,138,.22);
+      border-radius:18px;
+      padding:16px;
+      color:#d8fbee;
+    }
+
+    .privacy-box h4{
+      margin:0 0 10px;
+      color:var(--green);
+      font-size:18px;
+    }
+
+    .privacy-box p{
+      margin:0;
+      color:#c7d9f7;
+      line-height:1.5;
+      font-size:14px;
+    }
+
+    .content{
+      display:flex;
+      flex-direction:column;
+      gap:18px;
+    }
+
+    .panel{
+      background:linear-gradient(180deg, rgba(10,24,46,.96), rgba(7,18,34,.98));
+      border:1px solid var(--line);
+      border-radius:22px;
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+
+    .panel-header{
+      padding:20px 24px 10px;
+      border-bottom:1px solid rgba(31,51,91,.55);
+    }
+
+    .panel-header.center{
+      text-align:center;
+    }
+
+    .panel-header h2{
+      margin:0;
+      font-size:18px;
+      letter-spacing:.4px;
+    }
+
+    .panel-header p{
+      margin:8px 0 0;
+      color:var(--muted);
+      font-size:15px;
+    }
+
+    .profiles{
+      padding:26px 24px 10px;
+      display:grid;
+      grid-template-columns: repeat(2, minmax(280px, 1fr));
+      gap:20px;
+    }
+
+    .profile-card{
+      position:relative;
+      border-radius:22px;
+      padding:22px;
+      border:1px solid rgba(255,255,255,.08);
+      background:
+        radial-gradient(circle at top right, rgba(255,255,255,.03), transparent 20%),
+        linear-gradient(180deg, rgba(7,21,40,.9), rgba(8,17,30,.95));
+      overflow:hidden;
+      cursor:pointer;
+      transition:.25s ease;
+    }
+
+    .profile-card.green{
+      border-color:rgba(32,211,138,.5);
+      box-shadow: inset 0 0 40px rgba(32,211,138,.06);
+    }
+
+    .profile-card.purple{
+      border-color:rgba(143,86,255,.45);
+      box-shadow: inset 0 0 40px rgba(143,86,255,.05);
+    }
+
+    .profile-card:hover{
+      transform:translateY(-3px);
+    }
+
+    .profile-top{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:16px;
+      margin-bottom:16px;
+    }
+
+    .avatar-wrap{
+      display:flex;
+      gap:16px;
+      align-items:center;
+    }
+
+    .avatar{
+      width:96px;height:96px;border-radius:50%;
+      display:grid;place-items:center;
+      font-size:40px;font-weight:700;
+      border:3px solid currentColor;
+      background:rgba(255,255,255,.02);
+    }
+
+    .green .avatar{color:var(--green)}
+    .purple .avatar{color:var(--purple)}
+
+    .profile-name{
+      font-size:22px;
+      font-weight:800;
+      margin:0 0 8px;
+    }
+
+    .tag{
+      display:inline-flex;
+      padding:5px 10px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:700;
+      margin-bottom:10px;
+    }
+
+    .tag.green{background:rgba(32,211,138,.14); color:var(--green)}
+    .tag.purple{background:rgba(143,86,255,.15); color:#c49cff)}
+
+    .profile-info{
+      display:grid;
+      gap:8px;
+      color:#dfe8fb;
+      font-size:14px;
+    }
+
+    .finger{
+      width:86px;height:86px;border-radius:50%;
+      display:grid;place-items:center;
+      border:2px solid currentColor;
+      background:rgba(255,255,255,.015);
+      font-size:34px;
+    }
+
+    .green .finger{color:var(--green)}
+    .purple .finger{color:var(--purple)}
+
+    .enter-btn{
+      margin-top:18px;
+      width:100%;
+      border:none;
+      border-radius:14px;
+      padding:16px;
+      color:white;
+      font-size:20px;
+      font-weight:800;
+      cursor:pointer;
+    }
+
+    .enter-btn.green{
+      background:linear-gradient(90deg, #2ed58e, #1bbf9a);
+    }
+    .enter-btn.purple{
+      background:linear-gradient(90deg, #a14dff, #5750ff);
+    }
+
+    .privacy-strip{
+      margin: 8px 24px 24px;
+      border:1px solid rgba(31,51,91,.7);
+      background:rgba(255,255,255,.02);
+      border-radius:14px;
+      padding:14px 18px;
+      color:#d4e2ff;
+      text-align:center;
+    }
+
+    .privacy-strip b{color:var(--green)}
+
+    .personal-header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      padding:18px 24px;
+      border-bottom:1px solid rgba(31,51,91,.55);
+    }
+
+    .personal-header h3{
+      margin:0;
+      font-size:18px;
+    }
+
+    .session-line{
+      display:flex;
+      align-items:center;
+      gap:16px;
+      flex-wrap:wrap;
+    }
+
+    .secure{
+      color:var(--green);
+      font-weight:700;
+    }
+
+    .logout{
+      border:none;
+      background:transparent;
+      color:#ff6f7f;
+      border:1px solid rgba(255,93,115,.4);
+      padding:12px 18px;
+      border-radius:14px;
+      cursor:pointer;
+      font-weight:700;
+    }
+
+    .dashboard{
+      padding:18px 18px 20px;
+      display:grid;
+      grid-template-columns: 310px 1fr 320px;
+      gap:18px;
+    }
+
+    .box{
+      background:linear-gradient(180deg, rgba(11,25,48,.9), rgba(8,19,36,.95));
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:16px;
+      min-height:100px;
+    }
+
+    .box-title{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-size:16px;
+      font-weight:800;
+      margin-bottom:14px;
+      color:#f1f6ff;
+    }
+
+    .summary-list{
+      display:grid;
+      gap:12px;
+    }
+
+    .summary-card{
+      border-radius:16px;
+      padding:14px 14px 14px 16px;
+      border:1px solid rgba(255,255,255,.06);
+      background:rgba(255,255,255,.02);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+
+    .summary-left{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      min-width:0;
+    }
+
+    .summary-icon{
+      width:44px;height:44px;border-radius:12px;
+      display:grid;place-items:center;
+      font-size:22px;font-weight:700;color:white;
+      flex-shrink:0;
+    }
+
+    .ic-green{background:#1fa96c}
+    .ic-orange{background:#e58a2f}
+    .ic-blue{background:#267bea}
+    .ic-red{background:#df4e63}
+
+    .summary-text{
+      min-width:0;
+    }
+
+    .summary-text .label{
+      font-size:14px;
+      color:#dbe7ff;
+      margin-bottom:4px;
+    }
+
+    .summary-text .money{
+      font-size:15px;
+      color:#8ab0ff;
+      letter-spacing:2px;
+      font-weight:800;
+    }
+
+    .eye{
+      width:38px;height:38px;border-radius:12px;
+      display:grid;place-items:center;
+      background:rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.08);
+      cursor:pointer;
+      color:#a9c2f3;
+      flex-shrink:0;
+    }
+
+    .left-footer{
+      margin-top:14px;
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    .actions-grid{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:14px;
+    }
+
+    .action-card{
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,.07);
+      background:rgba(255,255,255,.02);
+      padding:18px 14px;
+      text-align:center;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+      gap:12px;
+      min-height:175px;
+    }
+
+    .action-icon{
+      width:52px;height:52px;border-radius:16px;
+      margin:0 auto;
+      display:grid;place-items:center;
+      font-size:24px;font-weight:700;
+      background:rgba(255,255,255,.03);
+    }
+
+    .action-card h4{
+      margin:0;
+      font-size:22px;
+    }
+
+    .action-card p{
+      margin:0;
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.4;
+    }
+
+    .action-btn{
+      border:none;
+      border-radius:12px;
+      padding:12px;
+      font-size:16px;
+      font-weight:800;
+      color:white;
+      cursor:pointer;
+    }
+
+    .btn-green{background:#168f60}
+    .btn-purple{background:#7140df}
+    .btn-blue{background:#156fd9}
+    .btn-yellow{background:#9f7b06}
+    .btn-cyan{background:#006f86}
+    .btn-pink{background:#b22d84}
+
+    .activity-list{
+      display:grid;
+      gap:12px;
+    }
+
+    .activity-item{
+      display:grid;
+      grid-template-columns: 42px 1fr auto;
+      align-items:center;
+      gap:12px;
+      padding:12px;
+      border-radius:14px;
+      background:rgba(255,255,255,.02);
+      border:1px solid rgba(255,255,255,.05);
+    }
+
+    .activity-i{
+      width:42px;height:42px;border-radius:12px;
+      display:grid;place-items:center;
+      font-size:20px;color:white;
+    }
+
+    .ai-green{background:#167c5b}
+    .ai-orange{background:#a86721}
+    .ai-blue{background:#1468c6}
+    .ai-pink{background:#9d2d75}
+
+    .activity-main .t{
+      font-size:15px;
+      font-weight:700;
+    }
+
+    .activity-main .s{
+      color:var(--muted);
+      font-size:13px;
+      margin-top:4px;
+    }
+
+    .activity-right{
+      text-align:right;
+      font-size:13px;
+      color:#b8caea;
+      white-space:nowrap;
+    }
+
+    .view-all{
+      margin-top:14px;
+      width:100%;
+      background:rgba(255,255,255,.02);
+      border:1px solid rgba(255,255,255,.08);
+      color:#dce8ff;
+      padding:14px;
+      border-radius:14px;
+      font-weight:800;
+      cursor:pointer;
+    }
+
+    .hidden{display:none !important}
+
+    .modal{
+      position:fixed;
+      inset:0;
+      background:rgba(3,8,16,.75);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+      z-index:1000;
+      backdrop-filter: blur(8px);
+    }
+
+    .modal-card{
+      width:min(520px, 100%);
+      background:linear-gradient(180deg, rgba(11,25,48,.98), rgba(8,19,36,.98));
+      border:1px solid var(--line);
+      border-radius:24px;
+      box-shadow:var(--shadow);
+      padding:24px;
+    }
+
+    .modal-card h3{
+      margin:0 0 8px;
+      font-size:28px;
+    }
+
+    .modal-card p{
+      margin:0 0 16px;
+      color:var(--muted);
+      line-height:1.5;
+    }
+
+    .field{
+      margin-bottom:14px;
+    }
+
+    .field label{
+      display:block;
+      margin-bottom:8px;
+      color:#d8e6ff;
+      font-size:14px;
+      font-weight:700;
+    }
+
+    .field input{
+      width:100%;
+      border:none;
+      outline:none;
+      background:#081425;
+      color:white;
+      border:1px solid var(--line);
+      padding:15px 14px;
+      border-radius:14px;
+      font-size:16px;
+    }
+
+    .row{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+
+    .modal-actions{
+      display:flex;
+      gap:12px;
+      margin-top:16px;
+    }
+
+    .modal-actions button{
+      flex:1;
+      border:none;
+      border-radius:14px;
+      padding:14px;
+      font-weight:800;
+      font-size:16px;
+      cursor:pointer;
+    }
+
+    .primary{background:linear-gradient(90deg, #2ed58e, #1bbf9a); color:white}
+    .secondary{background:transparent; color:#dce8ff; border:1px solid rgba(255,255,255,.12)}
+    .danger{background:linear-gradient(90deg, #c93b54, #f04e65); color:white}
+
+    .msg{
+      margin-top:10px;
+      min-height:20px;
+      font-size:14px;
+      color:#ff9cab;
+    }
+
+    .footer{
+      text-align:center;
+      color:#9eb0d1;
+      padding:14px 0 4px;
+      font-size:14px;
+    }
+
+    @media (max-width: 1200px){
+      .dashboard{
+        grid-template-columns:1fr;
+      }
+      .actions-grid{
+        grid-template-columns: repeat(2,1fr);
+      }
+    }
+
+    @media (max-width: 980px){
+      .layout{
+        grid-template-columns:1fr;
+      }
+      .sidebar{
+        min-height:auto;
+      }
+      .topbar{
+        grid-template-columns:1fr;
+      }
+      .profiles{
+        grid-template-columns:1fr;
+      }
+    }
+
+    @media (max-width: 700px){
+      .actions-grid{
+        grid-template-columns:1fr;
+      }
+      .row{
+        grid-template-columns:1fr;
+      }
+      .personal-header{
+        flex-direction:column;
+        align-items:flex-start;
+      }
+      .brand{
+        flex-direction:column;
+        align-items:flex-start;
+      }
+    }
+  </style>
 </head>
-
 <body>
+  <div class="app">
+    <div class="topbar">
+      <div class="brand">
+        <div class="brand-icon">$</div>
+        <div>
+          <h1>PRÉSTAMOS Y <span>ADELANTOS</span></h1>
+          <p>Sistema de control financiero</p>
+        </div>
+      </div>
 
-<h1>PRÉSTAMOS Y ADELANTOS</h1>
+      <div class="top-card">
+        <div class="label">Hoy es</div>
+        <div class="value" id="fechaHoy">--</div>
+      </div>
 
-<div id="lista" class="container"></div>
+      <div class="top-card">
+        <div class="label">Hora actual</div>
+        <div class="value" id="horaActual">--:--</div>
+      </div>
 
-<div id="login" class="hidden">
-  <h2 id="nombre"></h2>
-  <input type="password" id="pass" placeholder="Contraseña">
-  <br>
-  <button onclick="entrar()">Entrar</button>
-</div>
+      <div class="top-card">
+        <div class="label">Sesión</div>
+        <div class="value" id="sesionTop">Sin acceso</div>
+      </div>
+    </div>
 
-<div id="panel" class="hidden">
-  <h2 id="titulo"></h2>
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="menu-item active">
+          <div class="menu-icon">⌂</div>
+          <div>Inicio</div>
+        </div>
+        <div class="menu-item">
+          <div class="menu-icon">👤</div>
+          <div>Mi Panel</div>
+        </div>
+        <div class="menu-item">
+          <div class="menu-icon">🕘</div>
+          <div>Historial</div>
+        </div>
+        <div class="menu-item">
+          <div class="menu-icon">📝</div>
+          <div>Solicitudes</div>
+        </div>
 
-  <p>Sueldo semana: $<span id="sueldo"></span></p>
-  <p>Adelantos: $<span id="adelantos"></span></p>
-  <p>Pago deuda: $<span id="pago"></span></p>
-  <p>Deuda total: $<span id="deuda"></span></p>
-  <p><b>Te queda: $<span id="restante"></span></b></p>
+        <div class="menu-title">ADMINISTRACIÓN</div>
 
-  <div id="adminPanel" class="hidden">
-    <h3>ADMIN</h3>
+        <div class="menu-item">
+          <div class="menu-icon">👥</div>
+          <div>Personas</div>
+        </div>
+        <div class="menu-item">
+          <div class="menu-icon">📊</div>
+          <div>Reportes</div>
+        </div>
+        <div class="menu-item">
+          <div class="menu-icon">⚙</div>
+          <div>Configuración</div>
+        </div>
 
-    <input id="nuevoSueldo" placeholder="Nuevo sueldo">
-    <button onclick="setSueldo()">Actualizar sueldo</button>
+        <div class="privacy-box">
+          <h4>Tu información</h4>
+          <p>Solo tú puedes ver tus datos financieros. Nadie más tiene acceso a tu información.</p>
+          <div style="margin-top:10px;color:var(--green);font-weight:800;">🔒 100% Confidencial</div>
+        </div>
+      </aside>
 
-    <input id="montoPrestamo" placeholder="Préstamo">
-    <button onclick="prestamo()">Agregar préstamo</button>
+      <main class="content">
+        <section class="panel">
+          <div class="panel-header center">
+            <h2>SELECCIONA TU PERFIL PARA INGRESAR 🔒</h2>
+            <p>Tu información financiera es privada y segura</p>
+          </div>
 
-    <input id="montoAdelanto" placeholder="Adelanto">
-    <button onclick="adelanto()">Agregar adelanto</button>
+          <div id="profiles" class="profiles"></div>
 
-    <input id="pagoDeuda" placeholder="Pago deuda">
-    <button onclick="pagar()">Registrar pago</button>
+          <div class="privacy-strip">
+            🛡 Solo tú puedes ver tu información financiera. La privacidad de tus datos está <b>100% garantizada</b>.
+          </div>
+        </section>
 
-    <button onclick="interes()">Aplicar 10% interés</button>
+        <section class="panel">
+          <div class="personal-header">
+            <div>
+              <h3 id="panelName">PANEL PERSONAL</h3>
+              <div style="color:var(--muted);margin-top:6px;">Vista general de tu información financiera</div>
+            </div>
+
+            <div class="session-line">
+              <div id="secureText" class="secure">🔒 Sesión cerrada</div>
+              <button class="logout hidden" id="logoutBtn" onclick="cerrarSesion()">Cerrar Sesión</button>
+            </div>
+          </div>
+
+          <div class="dashboard">
+            <div class="box">
+              <div class="box-title">🛡 RESUMEN RÁPIDO</div>
+              <div class="summary-list">
+                <div class="summary-card">
+                  <div class="summary-left">
+                    <div class="summary-icon ic-green">💵</div>
+                    <div class="summary-text">
+                      <div class="label">Lo que te queda esta semana</div>
+                      <div class="money" id="mRestante">***</div>
+                    </div>
+                  </div>
+                  <div class="eye" onclick="toggleValores()">👁</div>
+                </div>
+
+                <div class="summary-card">
+                  <div class="summary-left">
+                    <div class="summary-icon ic-orange">🪙</div>
+                    <div class="summary-text">
+                      <div class="label">Adelantos de la semana</div>
+                      <div class="money" id="mAdelantos">***</div>
+                    </div>
+                  </div>
+                  <div class="eye" onclick="toggleValores()">👁</div>
+                </div>
+
+                <div class="summary-card">
+                  <div class="summary-left">
+                    <div class="summary-icon ic-blue">🔁</div>
+                    <div class="summary-text">
+                      <div class="label">Pagos aplicados a deuda</div>
+                      <div class="money" id="mPago">***</div>
+                    </div>
+                  </div>
+                  <div class="eye" onclick="toggleValores()">👁</div>
+                </div>
+
+                <div class="summary-card">
+                  <div class="summary-left">
+                    <div class="summary-icon ic-red">📉</div>
+                    <div class="summary-text">
+                      <div class="label">Deuda total (con interés)</div>
+                      <div class="money" id="mDeuda">***</div>
+                    </div>
+                  </div>
+                  <div class="eye" onclick="toggleValores()">👁</div>
+                </div>
+              </div>
+
+              <div class="left-footer">⟳ Actualizado: <span id="lastUpdated">--</span></div>
+            </div>
+
+            <div class="box">
+              <div class="box-title">⚙ ACCIONES RÁPIDAS</div>
+
+              <div class="actions-grid" id="actionsGrid">
+                <div class="action-card">
+                  <div class="action-icon" style="color:#4ff2a6;">👛</div>
+                  <div>
+                    <h4>Solicitar Adelanto</h4>
+                    <p>Realiza una nueva solicitud</p>
+                  </div>
+                  <button class="action-btn btn-green" onclick="abrirModal('adelanto')">SOLICITAR</button>
+                </div>
+
+                <div class="action-card">
+                  <div class="action-icon" style="color:#b180ff;">💲</div>
+                  <div>
+                    <h4>Solicitar Préstamo</h4>
+                    <p>Realiza una nueva solicitud</p>
+                  </div>
+                  <button class="action-btn btn-purple" onclick="abrirModal('prestamo')">SOLICITAR</button>
+                </div>
+
+                <div class="action-card">
+                  <div class="action-icon" style="color:#5faeff;">💳</div>
+                  <div>
+                    <h4>Registrar Pago</h4>
+                    <p>Realiza un pago a tu deuda</p>
+                  </div>
+                  <button class="action-btn btn-blue" onclick="abrirModal('pago')">PAGAR</button>
+                </div>
+
+                <div class="action-card hidden admin-only">
+                  <div class="action-icon" style="color:#ffd25b;">%</div>
+                  <div>
+                    <h4>Aplicar Interés</h4>
+                    <p>Aplicar 10% interés mensual</p>
+                  </div>
+                  <button class="action-btn btn-yellow" onclick="aplicarInteres()">APLICAR</button>
+                </div>
+
+                <div class="action-card hidden admin-only">
+                  <div class="action-icon" style="color:#4ff2ef;">📝</div>
+                  <div>
+                    <h4>Actualizar Sueldo</h4>
+                    <p>Cambiar sueldo semanal</p>
+                  </div>
+                  <button class="action-btn btn-cyan" onclick="abrirModal('sueldo')">ACTUALIZAR</button>
+                </div>
+
+                <div class="action-card">
+                  <div class="action-icon" style="color:#ff67c9;">📄</div>
+                  <div>
+                    <h4>Ver Historial</h4>
+                    <p>Consulta tus movimientos</p>
+                  </div>
+                  <button class="action-btn btn-pink" onclick="verHistorial()">VER</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="box">
+              <div class="box-title">🕘 ACTIVIDAD RECIENTE</div>
+              <div class="activity-list" id="activityList"></div>
+              <button class="view-all" onclick="verHistorial()">VER TODA LA ACTIVIDAD →</button>
+            </div>
+          </div>
+        </section>
+
+        <div class="footer">© 2025 Préstamos y Adelantos - Todos los derechos reservados</div>
+      </main>
+    </div>
   </div>
 
-  <br>
-  <button onclick="salir()">Salir</button>
-</div>
+  <div id="loginModal" class="modal hidden">
+    <div class="modal-card">
+      <h3 id="loginTitle">Ingresar</h3>
+      <p>Escribe tu contraseña. Solo podrás ver tu propia información.</p>
 
-<script>
-let personas = [
-  {
-    nombre: "Juan",
-    pass: "1234",
-    admin: "admin",
-    sueldo: 4000,
-    adelantos: 500,
-    pago: 300,
-    deuda: 2000
-  },
-  {
-    nombre: "Luis",
-    pass: "1111",
-    admin: "admin",
-    sueldo: 3500,
-    adelantos: 300,
-    pago: 200,
-    deuda: 1500
-  }
-];
+      <div class="field">
+        <label>Contraseña</label>
+        <input type="password" id="loginPass" placeholder="Escribe tu contraseña" />
+      </div>
 
-let actual = null;
-let esAdmin = false;
+      <div class="modal-actions">
+        <button class="primary" onclick="entrar()">ENTRAR</button>
+        <button class="secondary" onclick="cerrarModalLogin()">CANCELAR</button>
+      </div>
 
-function render() {
-  let lista = document.getElementById("lista");
-  lista.innerHTML = "";
+      <div class="msg" id="loginMsg"></div>
+    </div>
+  </div>
 
-  personas.forEach((p, i) => {
-    let div = document.createElement("div");
-    div.className = "card";
-    div.innerText = p.nombre;
-    div.onclick = () => abrir(i);
-    lista.appendChild(div);
-  });
-}
+  <div id="actionModal" class="modal hidden">
+    <div class="modal-card">
+      <h3 id="actionTitle">Nueva acción</h3>
+      <p id="actionDesc">Completa la información.</p>
 
-function abrir(i) {
-  actual = i;
-  document.getElementById("login").classList.remove("hidden");
-  document.getElementById("nombre").innerText = personas[i].nombre;
-}
+      <div class="field">
+        <label>Monto</label>
+        <input type="number" id="actionMonto" placeholder="Escribe el monto" />
+      </div>
 
-function entrar() {
-  let pass = document.getElementById("pass").value;
-  let p = personas[actual];
+      <div class="field hidden" id="fieldSueldo">
+        <label>Nuevo sueldo semanal</label>
+        <input type="number" id="nuevoSueldo" placeholder="Escribe el nuevo sueldo" />
+      </div>
 
-  if (pass === p.pass) {
-    esAdmin = false;
-  } else if (pass === p.admin) {
-    esAdmin = true;
-  } else {
-    alert("Contraseña incorrecta");
-    return;
-  }
+      <div class="field">
+        <label>Nota / motivo</label>
+        <input type="text" id="actionNota" placeholder="Opcional" />
+      </div>
 
-  document.getElementById("login").classList.add("hidden");
-  document.getElementById("panel").classList.remove("hidden");
+      <div class="modal-actions">
+        <button class="primary" onclick="confirmarAccion()">GUARDAR</button>
+        <button class="secondary" onclick="cerrarActionModal()">CANCELAR</button>
+      </div>
 
-  if (esAdmin) {
-    document.getElementById("adminPanel").classList.remove("hidden");
-  }
+      <div class="msg" id="actionMsg"></div>
+    </div>
+  </div>
 
-  actualizar();
-}
+  <script>
+    const defaultData = [
+      {
+        id: 1,
+        nombre: "Juan",
+        rol: "Operador",
+        pass: "1234",
+        admin: "admin",
+        sueldo: 4000,
+        adelantos: 500,
+        pago: 300,
+        deuda: 2200,
+        activo: true,
+        ultimoAcceso: "Hoy 11:45 AM",
+        historial: [
+          { tipo: "Pago aplicado", descripcion: "Pago de deuda", monto: 300, fecha: "Hoy 11:20 AM", clase: "green" },
+          { tipo: "Adelanto aprobado", descripcion: "Adelanto de efectivo", monto: 500, fecha: "Ayer 04:15 PM", clase: "orange" },
+          { tipo: "Préstamo aprobado", descripcion: "Préstamo personal", monto: 2000, fecha: "15/04/2025 02:40 PM", clase: "blue" },
+          { tipo: "Interés aplicado", descripcion: "Interés mensual 10%", monto: 200, fecha: "01/04/2025 12:00 AM", clase: "pink" }
+        ]
+      },
+      {
+        id: 2,
+        nombre: "Luis",
+        rol: "Operador",
+        pass: "1111",
+        admin: "admin",
+        sueldo: 3500,
+        adelantos: 300,
+        pago: 200,
+        deuda: 1500,
+        activo: true,
+        ultimoAcceso: "Ayer 09:30 PM",
+        historial: [
+          { tipo: "Pago aplicado", descripcion: "Pago de deuda", monto: 200, fecha: "Hoy 10:10 AM", clase: "green" },
+          { tipo: "Adelanto aprobado", descripcion: "Adelanto semanal", monto: 300, fecha: "Ayer 12:25 PM", clase: "orange" },
+          { tipo: "Préstamo aprobado", descripcion: "Préstamo personal", monto: 1200, fecha: "11/04/2025 05:10 PM", clase: "blue" }
+        ]
+      }
+    ];
 
-function actualizar() {
-  let p = personas[actual];
-  let restante = p.sueldo - p.adelantos - p.pago;
+    let personas = JSON.parse(localStorage.getItem("prestamos_adelantos_data")) || defaultData;
+    let actual = null;
+    let esAdmin = false;
+    let selectedIndex = null;
+    let actionType = null;
+    let valoresVisibles = false;
 
-  document.getElementById("titulo").innerText = p.nombre;
-  document.getElementById("sueldo").innerText = p.sueldo;
-  document.getElementById("adelantos").innerText = p.adelantos;
-  document.getElementById("pago").innerText = p.pago;
-  document.getElementById("deuda").innerText = p.deuda;
-  document.getElementById("restante").innerText = restante;
-}
+    function saveData() {
+      localStorage.setItem("prestamos_adelantos_data", JSON.stringify(personas));
+    }
 
-function setSueldo() {
-  personas[actual].sueldo = parseFloat(nuevoSueldo.value);
-  actualizar();
-}
+    function money(n) {
+      return new Intl.NumberFormat("es-MX", {
+        style: "currency",
+        currency: "MXN",
+        minimumFractionDigits: 2
+      }).format(n);
+    }
 
-function prestamo() {
-  let m = parseFloat(montoPrestamo.value);
-  personas[actual].deuda += m;
-  actualizar();
-}
+    function hourNow() {
+      const now = new Date();
+      document.getElementById("horaActual").textContent =
+        now.toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" });
 
-function adelanto() {
-  let m = parseFloat(montoAdelanto.value);
-  personas[actual].adelantos += m;
-  actualizar();
-}
+      document.getElementById("fechaHoy").textContent =
+        now.toLocaleDateString("es-MX", { day: "numeric", month: "long", year: "numeric" });
+    }
 
-function pagar() {
-  let m = parseFloat(pagoDeuda.value);
-  personas[actual].deuda -= m;
-  personas[actual].pago += m;
-  actualizar();
-}
+    function renderProfiles() {
+      const container = document.getElementById("profiles");
+      container.innerHTML = "";
 
-function interes() {
-  personas[actual].deuda *= 1.10;
-  actualizar();
-}
+      personas.forEach((p, i) => {
+        const colorClass = i % 2 === 0 ? "green" : "purple";
+        const colorTag = i % 2 === 0 ? "green" : "purple";
 
-function salir() {
-  document.getElementById("panel").classList.add("hidden");
-  document.getElementById("login").classList.add("hidden");
-}
+        const card = document.createElement("div");
+        card.className = profile-card ${colorClass};
+        card.innerHTML = `
+          <div class="profile-top">
+            <div class="avatar-wrap">
+              <div class="avatar">👤</div>
+              <div>
+                <div class="profile-name">${p.nombre}</div>
+                <div class="tag ${colorTag}">ACTIVO</div>
+                <div class="profile-info">
+                  <div>Rol: ${p.rol}</div>
+                  <div>Último acceso: ${p.ultimoAcceso}</div>
+                  <div>ID: 00${p.id}</div>
+                </div>
+              </div>
+            </div>
+            <div class="finger">🌀</div>
+          </div>
+          <button class="enter-btn ${colorClass}">INGRESAR A MI PANEL →</button>
+        `;
+        card.onclick = () => openLogin(i);
+        container.appendChild(card);
+      });
+    }
 
-render();
-</script>
+    function openLogin(index) {
+      selectedIndex = index;
+      document.getElementById("loginModal").classList.remove("hidden");
+      document.getElementById("loginTitle").textContent = Ingresar como ${personas[index].nombre};
+      document.getElementById("loginPass").value = "";
+      document.getElementById("loginMsg").textContent = "";
+    }
 
+    function cerrarModalLogin() {
+      document.getElementById("loginModal").classList.add("hidden");
+      selectedIndex = null;
+    }
+
+    function entrar() {
+      const pass = document.getElementById("loginPass").value.trim();
+      if (selectedIndex === null) return;
+
+      const p = personas[selectedIndex];
+
+      if (pass === p.pass) {
+        esAdmin = false;
+      } else if (pass === p.admin) {
+        esAdmin = true;
+      } else {
+        document.getElementById("loginMsg").textContent = "Contraseña incorrecta";
+        return;
+      }
+
+      actual = selectedIndex;
+      document.getElementById("loginModal").classList.add("hidden");
+      document.getElementById("logoutBtn").classList.remove("hidden");
+      document.getElementById("secureText").textContent = esAdmin ? "🔐 Sesión segura (Admin)" : "🔒 Sesión segura";
+      document.getElementById("sesionTop").textContent = esAdmin ? ${p.nombre} / Admin : ${p.nombre};
+
+      document.querySelectorAll(".admin-only").forEach(el => {
+        el.classList.toggle("hidden", !esAdmin);
+      });
+
+      valoresVisibles = false;
+      actualizarPanel();
+    }
+
+    function actualizarPanel() {
+      if (actual === null) return;
+
+      const p = personas[actual];
+      const restante = p.sueldo - p.adelantos - p.pago;
+
+      document.getElementById("panelName").textContent = PANEL PERSONAL: ${p.nombre.toUpperCase()};
+      document.getElementById("lastUpdated").textContent = new Date().toLocaleString("es-MX");
+
+      updateMoney("mRestante", restante);
+      updateMoney("mAdelantos", p.adelantos);
+      updateMoney("mPago", p.pago);
+      updateMoney("mDeuda", p.deuda);
+
+      renderActivity();
+      saveData();
+    }
+
+    function updateMoney(id, value) {
+      const el = document.getElementById(id);
+      el.textContent = valoresVisibles ? money(value) : "***";
+    }
+
+    function toggleValores() {
+      if (actual === null) return;
+      valoresVisibles = !valoresVisibles;
+      actualizarPanel();
+    }
+
+    function renderActivity() {
+      const p = personas[actual];
+      const list = document.getElementById("activityList");
+      list.innerHTML = "";
+
+      const items = p.historial.slice(0, 5);
+
+      if (!items.length) {
+        list.innerHTML = <div style="color:var(--muted)">No hay movimientos todavía.</div>;
+        return;
+      }
+
+      items.forEach(item => {
+        const amountVisible = valoresVisibles ? money(item.monto) : "$**";
+        const iconMap = {
+          green: "🛡",
+          orange: "👜",
+          blue: "💲",
+          pink: "%"
+        };
+
+        const div = document.createElement("div");
+        div.className = "activity-item";
+        div.innerHTML = `
+          <div class="activity-i ai-${item.clase}">${iconMap[item.clase] || "•"}</div>
+          <div class="activity-main">
+            <div class="t">${item.tipo}</div>
+            <div class="s">${item.descripcion}</div>
+          </div>
+          <div class="activity-right">
+            <div>${amountVisible}</div>
+            <div style="margin-top:4px;">${item.fecha}</div>
+          </div>
+        `;
+        list.appendChild(div);
+      });
+    }
+
+    function abrirModal(tipo) {
+      if (actual === null) return;
+      actionType = tipo;
+
+      document.getElementById("actionModal").classList.remove("hidden");
+      document.getElementById("actionMsg").textContent = "";
+      document.getElementById("actionMonto").value = "";
+      document.getElementById("actionNota").value = "";
+      document.getElementById("nuevoSueldo").value = "";
+      document.getElementById("fieldSueldo").classList.add("hidden");
+      document.getElementById("actionMonto").parentElement.classList.remove("hidden");
+
+      if (tipo === "adelanto") {
+        document.getElementById("actionTitle").textContent = "Solicitar Adelanto";
+        document.getElementById("actionDesc").textContent = "Registra un nuevo adelanto.";
+      }
+
+      if (tipo === "prestamo") {
+        document.getElementById("actionTitle").textContent = "Solicitar Préstamo";
+        document.getElementById("actionDesc").textContent = "Registra un nuevo préstamo.";
+      }
+
+      if (tipo === "pago") {
+        document.getElementById("actionTitle").textContent = "Registrar Pago";
+        document.getElementById("actionDesc").textContent = "Registra un pago a la deuda.";
+      }
+
+      if (tipo === "sueldo") {
+        document.getElementById("actionTitle").textContent = "Actualizar Sueldo";
+        document.getElementById("actionDesc").textContent = "Modifica el sueldo semanal.";
+        document.getElementById("fieldSueldo").classList.remove("hidden");
+        document.getElementById("actionMonto").parentElement.classList.add("hidden");
+      }
+    }
+
+    function cerrarActionModal() {
+      document.getElementById("actionModal").classList.add("hidden");
+      actionType = null;
+    }
+
+    function confirmarAccion() {
+      if (actual === null || !actionType) return;
+
+      const p = personas[actual];
+      const nota = document.getElementById("actionNota").value.trim() || "Sin nota";
+      const fecha = new Date().toLocaleString("es-MX");
+
+      if (actionType === "sueldo") {
+        const nuevo = parseFloat(document.getElementById("nuevoSueldo").value);
+        if (isNaN(nuevo) || nuevo < 0) {
+          document.getElementById("actionMsg").textContent = "Escribe un sueldo válido";
+          return;
+        }
+
+        p.sueldo = nuevo;
+        p.historial.unshift({
+          tipo: "Sueldo actualizado",
+          descripcion: nota,
+          monto: nuevo,
+          fecha,
+          clase: "blue"
+        });
+
+        cerrarActionModal();
+        actualizarPanel();
+        return;
+      }
+
+      const monto = parseFloat(document.getElementById("actionMonto").value);
+      if (isNaN(monto) || monto <= 0) {
+        document.getElementById("actionMsg").textContent = "Escribe un monto válido";
+        return;
+      }
+
+      if (actionType === "adelanto") {
+        p.adelantos += monto;
+        p.historial.unshift({
+          tipo: "Adelanto aprobado",
+          descripcion: nota,
+          monto,
+          fecha,
+          clase: "orange"
+        });
+      }
+
+      if (actionType === "prestamo") {
+        p.deuda += monto;
+        p.historial.unshift({
+          tipo: "Préstamo aprobado",
+          descripcion: nota,
+          monto,
+          fecha,
+          clase: "blue"
+        });
+      }
+
+      if (actionType === "pago") {
+        p.pago += monto;
+        p.deuda -= monto;
+        if (p.deuda < 0) p.deuda = 0;
+        p.historial.unshift({
+          tipo: "Pago aplicado",
+          descripcion: nota,
+          monto,
+          fecha,
+          clase: "green"
+        });
+      }
+
+      cerrarActionModal();
+      actualizarPanel();
+    }
+
+    function aplicarInteres() {
+      if (actual === null || !esAdmin) return;
+      const p = personas[actual];
+      const interes = +(p.deuda * 0.10).toFixed(2);
+      p.deuda = +(p.deuda + interes).toFixed(2);
+
+      p.historial.unshift({
+        tipo: "Interés aplicado",
+        descripcion: "Interés mensual 10%",
+        monto: interes,
+        fecha: new Date().toLocaleString("es-MX"),
+        clase: "pink"
+      });
+
+      actualizarPanel();
+    }
+
+    function verHistorial() {
+      if (actual === null) {
+        alert("Primero entra a un perfil.");
+        return;
+      }
+
+      const p = personas[actual];
+      let texto = `Historial de ${p.nombre}\n\n`;
+      p.historial.forEach((h, i) => {
+        texto += `${i + 1}. ${h.tipo} - ${valoresVisibles ? money(h.monto) : "$****"} - ${h.fecha}\n${h.descripcion}\n\n`;
+      });
+
+      alert(texto);
+    }
+
+    function cerrarSesion() {
+      actual = null;
+      esAdmin = false;
+      valoresVisibles = false;
+      document.getElementById("panelName").textContent = "PANEL PERSONAL";
+      document.getElementById("secureText").textContent = "🔒 Sesión cerrada";
+      document.getElementById("sesionTop").textContent = "Sin acceso";
+      document.getElementById("logoutBtn").classList.add("hidden");
+      document.querySelectorAll(".admin-only").forEach(el => el.classList.add("hidden"));
+
+      ["mRestante","mAdelantos","mPago","mDeuda"].forEach(id => {
+        document.getElementById(id).textContent = "***";
+      });
+
+      document.getElementById("activityList").innerHTML = <div style="color:var(--muted)">Inicia sesión para ver tu actividad.</div>;
+    }
+
+    function init() {
+      renderProfiles();
+      hourNow();
+      setInterval(hourNow, 1000);
+      document.getElementById("activityList").innerHTML = <div style="color:var(--muted)">Inicia sesión para ver tu actividad.</div>;
+    }
+
+    init();
+  </script>
 </body>
 </html>
