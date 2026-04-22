@@ -18,36 +18,38 @@ import {
   getDocs,
   query,
   where,
-  orderBy,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-/* =========================
-   PEGA AQUÍ TU CONFIG FIREBASE
-========================= */
-const firebaseConfig = {
-  apiKey: "PEGA_AQUI",
-  authDomain: "PEGA_AQUI",
-  projectId: "PEGA_AQUI",
-  storageBucket: "PEGA_AQUI",
-  messagingSenderId: "PEGA_AQUI",
-  appId: "PEGA_AQUI"
+/* =========================================================
+   1) PEGA AQUÍ TU CONFIG DE FIREBASE
+========================================================= */
+const firebaseConfig = { 
+  apiKey : "AIzaSyA2NnujJ6mhHGkE96tD5Wu7b9_TqL5xVz8" , 
+  authDomain : "prestamos-y-adelantos-c5c7e.firebaseapp.com" , 
+  projectId : "prestamos-y-adelantos-c5c7e" , 
+  storageBucket : "prestamos-y-adelantos-c5c7e.firebasestorage.app" , 
+  messagingSenderId : "357105218615" , 
+  appId : "1:357105218615:web:855dc31356f4f06ef7bbb2" 
 };
 
-/* =========================
-   PON AQUÍ TU CORREO ADMIN
-========================= */
+/* =========================================================
+   2) PON AQUÍ TU CORREO DE ADMIN
+========================================================= */
 const ADMIN_EMAILS = [
   "tu_correo_admin@ejemplo.com"
 ];
 
+/* =========================================================
+   FIREBASE
+========================================================= */
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-/* =========================
+/* =========================================================
    DOM
-========================= */
+========================================================= */
 const todayDate = document.getElementById("todayDate");
 const todayTime = document.getElementById("todayTime");
 const sessionStatus = document.getElementById("sessionStatus");
@@ -62,8 +64,8 @@ const searchOperatorInput = document.getElementById("searchOperatorInput");
 
 const openRegisterBtn = document.getElementById("openRegisterBtn");
 const openLoginBtn = document.getElementById("openLoginBtn");
-const logoutBtn = document.getElementById("logoutBtn");
 const reloadOperatorsBtn = document.getElementById("reloadOperatorsBtn");
+const logoutBtn = document.getElementById("logoutBtn");
 
 const registerModal = document.getElementById("registerModal");
 const loginModal = document.getElementById("loginModal");
@@ -106,10 +108,10 @@ const mRestante = document.getElementById("mRestante");
 const mSemanaPagada = document.getElementById("mSemanaPagada");
 const mSemanaCotejada = document.getElementById("mSemanaCotejada");
 const lastUpdatedText = document.getElementById("lastUpdatedText");
+
 const activityList = document.getElementById("activityList");
 
 const toggleAmountsBtn = document.getElementById("toggleAmountsBtn");
-
 const requestAdvanceBtn = document.getElementById("requestAdvanceBtn");
 const requestLoanBtn = document.getElementById("requestLoanBtn");
 const payDebtBtn = document.getElementById("payDebtBtn");
@@ -117,9 +119,9 @@ const updateSalaryBtn = document.getElementById("updateSalaryBtn");
 const applyInterestBtn = document.getElementById("applyInterestBtn");
 const markReviewedBtn = document.getElementById("markReviewedBtn");
 
-/* =========================
+/* =========================================================
    STATE
-========================= */
+========================================================= */
 let currentUser = null;
 let currentUserDoc = null;
 let currentFinanceDoc = null;
@@ -127,15 +129,19 @@ let currentAction = null;
 let amountsVisible = false;
 let adminViewingUid = null;
 
-/* =========================
+/* =========================================================
    HELPERS
-========================= */
+========================================================= */
 function money(value = 0) {
   return new Intl.NumberFormat("es-MX", {
     style: "currency",
     currency: "MXN",
     minimumFractionDigits: 2
   }).format(Number(value || 0));
+}
+
+function isAdmin(email = "") {
+  return ADMIN_EMAILS.includes(email.toLowerCase());
 }
 
 function getCurrentWeekLabel() {
@@ -154,14 +160,6 @@ function getInitials(name = "") {
     .join("");
 }
 
-function isAdmin(email = "") {
-  return ADMIN_EMAILS.includes(email.toLowerCase());
-}
-
-function calcRestante(fin) {
-  return Number(fin.sueldo || 0) - Number(fin.adelantos || 0) - Number(fin.pago || 0);
-}
-
 function show(el) {
   el.classList.remove("hidden");
 }
@@ -170,12 +168,12 @@ function hide(el) {
   el.classList.add("hidden");
 }
 
-function openModal(modal) {
-  show(modal);
+function openModal(el) {
+  show(el);
 }
 
-function closeModal(modal) {
-  hide(modal);
+function closeModal(el) {
+  hide(el);
 }
 
 function setClock() {
@@ -193,8 +191,23 @@ function setClock() {
 setClock();
 setInterval(setClock, 1000);
 
+function calcRestante(fin) {
+  return Number(fin.sueldo || 0) - Number(fin.adelantos || 0) - Number(fin.pago || 0);
+}
+
 function renderMaskedOrValue(value) {
   return amountsVisible ? money(value) : "***";
+}
+
+function clearSummary() {
+  mSueldo.textContent = "***";
+  mAdelantos.textContent = "***";
+  mPago.textContent = "***";
+  mDeuda.textContent = "***";
+  mRestante.textContent = "***";
+  mSemanaPagada.textContent = "No";
+  mSemanaCotejada.textContent = "No";
+  lastUpdatedText.textContent = "Actualizado: --";
 }
 
 function setSummary(fin) {
@@ -210,44 +223,45 @@ function setSummary(fin) {
   lastUpdatedText.textContent = Actualizado: ${new Date().toLocaleString("es-MX")};
 }
 
-function clearSummary() {
-  mSueldo.textContent = "***";
-  mAdelantos.textContent = "***";
-  mPago.textContent = "***";
-  mDeuda.textContent = "***";
-  mRestante.textContent = "***";
-  mSemanaPagada.textContent = "No";
-  mSemanaCotejada.textContent = "No";
-  lastUpdatedText.textContent = "Actualizado: --";
-}
-
-function resetActionModal() {
+function resetActionFields() {
   actionAmount.value = "";
-  actionWeek.value = getCurrentWeekLabel();
+  actionWeek.value = "";
   actionNote.value = "";
   actionMsg.textContent = "";
 }
 
-/* =========================
-   PUBLIC PROFILES
-========================= */
-async function loadProfiles() {
-  profilesGrid.innerHTML = "";
-  const snap = await getDocs(collection(db, "usuarios"));
+function escapeHtml(str = "") {
+  return String(str)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
 
-  if (snap.empty) {
+/* =========================================================
+   PERFIL PÚBLICO
+========================================================= */
+async function loadProfiles() {
+  profilesGrid.innerHTML = `<div class="empty-state">Cargando operadores...</div>○;
+
+  const snap = await getDocs(collection(db, "usuarios"));
+  const operadores = [];
+
+  snap.forEach(docSnap => {
+    const data = docSnap.data();
+    if (data.rol === "operador") operadores.push(data);
+  });
+
+  if (!operadores.length) {
     profilesGrid.innerHTML = `<div class="empty-state">Aún no hay operadores registrados.</div>`;
     return;
   }
 
-  let i = 0;
+  profilesGrid.innerHTML = "";
 
-  snap.forEach(docSnap => {
-    const u = docSnap.data();
-    if (u.rol !== "operador") return;
-
-    const tone = i % 2 === 0 ? "green" : "purple";
-    i++;
+  operadores.forEach((u, index) => {
+    const tone = index % 2 === 0 ? "green" : "purple";
 
     const card = document.createElement("div");
     card.className = `profile-card ${tone}`;
@@ -256,7 +270,7 @@ async function loadProfiles() {
         <div class="avatar-wrap">
           <div class="avatar">${getInitials(u.nombre)}</div>
           <div>
-            <div class="profile-name">${u.nombre}</div>
+            <div class="profile-name">${escapeHtml(u.nombre)}</div>
             <div class="tag ${tone}">ACTIVO</div>
             <div class="profile-info">
               <div>Rol: Operador</div>
@@ -269,19 +283,21 @@ async function loadProfiles() {
       </div>
       <button class="enter-btn ${tone}">INGRESAR A MI PANEL →</button>
     `;
+
     card.addEventListener("click", () => {
-      openModal(loginModal);
       loginEmail.value = u.email || "";
       loginPassword.value = "";
       loginMsg.textContent = "";
+      openModal(loginModal);
     });
+
     profilesGrid.appendChild(card);
   });
 }
 
-/* =========================
-   REGISTER
-========================= */
+/* =========================================================
+   REGISTRO
+========================================================= */
 async function registerOperator() {
   registerMsg.textContent = "";
 
@@ -289,8 +305,13 @@ async function registerOperator() {
   const email = registerEmail.value.trim().toLowerCase();
   const password = registerPassword.value.trim();
 
-  if (!name || !email || password.length < 6) {
-    registerMsg.textContent = "Completa todos los campos. La contraseña debe tener mínimo 6 caracteres.";
+  if (!name || !email || !password) {
+    registerMsg.textContent = "Completa todos los campos.";
+    return;
+  }
+
+  if (password.length < 6) {
+    registerMsg.textContent = "La contraseña debe tener mínimo 6 caracteres.";
     return;
   }
 
@@ -319,11 +340,12 @@ async function registerOperator() {
       updatedAt: serverTimestamp()
     });
 
+    registerMsg.style.color = "#20d38a";
+    registerMsg.textContent = "Operador creado correctamente.";
+
     registerName.value = "";
     registerEmail.value = "";
     registerPassword.value = "";
-    registerMsg.style.color = "#20d38a";
-    registerMsg.textContent = "Operador creado correctamente.";
 
     await loadProfiles();
   } catch (error) {
@@ -332,11 +354,12 @@ async function registerOperator() {
   }
 }
 
-/* =========================
+/* =========================================================
    LOGIN / LOGOUT
-========================= */
+========================================================= */
 async function loginUser() {
   loginMsg.textContent = "";
+
   const email = loginEmail.value.trim().toLowerCase();
   const password = loginPassword.value.trim();
 
@@ -358,9 +381,9 @@ async function logoutUser() {
   await signOut(auth);
 }
 
-/* =========================
-   LOAD USER PANEL
-========================= */
+/* =========================================================
+   CARGA DE PANEL
+========================================================= */
 async function loadCurrentPanel(uid) {
   const userSnap = await getDoc(doc(db, "usuarios", uid));
   const finSnap = await getDoc(doc(db, "finanzas", uid));
@@ -370,30 +393,29 @@ async function loadCurrentPanel(uid) {
   currentUserDoc = userSnap.data();
   currentFinanceDoc = finSnap.data();
 
-  const role = currentUserDoc.rol;
+  sessionStatus.textContent = currentUserDoc.rol === "admin"
+    ? "Admin"
+    : currentUserDoc.nombre;
 
-  sessionStatus.textContent = role === "admin" ? "Admin" : currentUserDoc.nombre;
-  panelTitle.textContent = role === "admin"
-    ? `PANEL DE ${currentUserDoc.nombre.toUpperCase()}`
-    : `PANEL DE ${currentUserDoc.nombre.toUpperCase()}`;
-
-  panelSubtitle.textContent = role === "admin"
+  panelTitle.textContent = `PANEL DE ${currentUserDoc.nombre.toUpperCase()}`;
+  panelSubtitle.textContent = currentUserDoc.rol === "admin"
     ? "Control general y edición administrativa"
     : "Vista general de tu información financiera";
 
-  secureSessionText.textContent = role === "admin"
+  secureSessionText.textContent = currentUserDoc.rol === "admin"
     ? "🔐 Sesión segura (Admin)"
     : "🔒 Sesión segura";
 
+  show(personalPanel);
   show(logoutBtn);
   setSummary(currentFinanceDoc);
 
   document.querySelectorAll(".admin-only").forEach(el => {
-    if (role === "admin") show(el);
+    if (currentUserDoc.rol === "admin") show(el);
     else hide(el);
   });
 
-  if (role === "admin") {
+  if (currentUserDoc.rol === "admin") {
     show(adminPanel);
     await loadAdminOperators();
   } else {
@@ -410,12 +432,12 @@ async function loadActivity(uid) {
   const snap = await getDocs(qRef);
 
   const movements = [];
-  snap.forEach(d => movements.push({ id: d.id, ...d.data() }));
+  snap.forEach(docSnap => movements.push({ id: docSnap.id, ...docSnap.data() }));
 
   movements.sort((a, b) => {
-    const aTime = a.createdAt?.seconds || 0;
-    const bTime = b.createdAt?.seconds || 0;
-    return bTime - aTime;
+    const at = a.createdAt?.seconds || 0;
+    const bt = b.createdAt?.seconds || 0;
+    return bt - at;
   });
 
   if (!movements.length) {
@@ -424,16 +446,17 @@ async function loadActivity(uid) {
   }
 
   activityList.innerHTML = "";
+
   movements.slice(0, 10).forEach(mov => {
-    const item = document.createElement("div");
-    item.className = "activity-item";
-    item.innerHTML = `
+    const div = document.createElement("div");
+    div.className = "activity-item";
+    div.innerHTML = `
       <div>
-        <div class="activity-title">${mov.tipo || "Movimiento"}</div>
+        <div class="activity-title">${escapeHtml(mov.tipo || "Movimiento")}</div>
         <div class="activity-sub">
-          ${mov.nota || "Sin nota"}<br>
-          Semana: ${mov.semana || "--"}<br>
-          Estado: ${mov.estado || "registrado"}
+          ${escapeHtml(mov.nota || "Sin nota")}<br>
+          Semana: ${escapeHtml(mov.semana || "--")}<br>
+          Estado: ${escapeHtml(mov.estado || "registrado")}
         </div>
       </div>
       <div class="activity-right">
@@ -443,13 +466,13 @@ async function loadActivity(uid) {
         </div>
       </div>
     `;
-    activityList.appendChild(item);
+    activityList.appendChild(div);
   });
 }
 
-/* =========================
-   ADMIN OPERATORS
-========================= */
+/* =========================================================
+   PANEL ADMIN
+========================================================= */
 async function loadAdminOperators() {
   adminOperatorsList.innerHTML = `<div class="empty-state">Cargando operadores...</div>`;
 
@@ -482,8 +505,8 @@ async function loadAdminOperators() {
     card.className = "operator-card-admin";
     card.innerHTML = `
       <div class="operator-info">
-        <h3>${user.nombre}</h3>
-        <p>${user.email}</p>
+        <h3>${escapeHtml(user.nombre)}</h3>
+        <p>${escapeHtml(user.email)}</p>
         <p>Sueldo: ${fin ? money(fin.sueldo || 0) : "$0.00"}</p>
         <p>Deuda: ${fin ? money(fin.deuda || 0) : "$0.00"}</p>
         <p>Semana marcada: ${fin?.semanaMarcada ? "Sí" : "No"} / Cotejada: ${fin?.semanaCotejada ? "Sí" : "No"}</p>
@@ -495,6 +518,7 @@ async function loadAdminOperators() {
         <button class="btn btn-outline" data-action="interest" data-uid="${user.uid}">Aplicar interés</button>
       </div>
     `;
+
     adminOperatorsList.appendChild(card);
   }
 
@@ -537,6 +561,8 @@ async function openAdminView(uid) {
 
   panelTitle.textContent = `ADMIN VIENDO: ${user.nombre.toUpperCase()}`;
   panelSubtitle.textContent = `Operador: ${user.email}`;
+  currentFinanceDoc = fin;
+
   setSummary(fin);
   await loadActivity(uid);
 }
@@ -563,15 +589,15 @@ async function reviewWeek(uid) {
     createdAt: serverTimestamp()
   });
 
-  if (currentUserDoc?.rol === "admin") {
-    await loadAdminOperators();
-  }
+  const updatedSnap = await getDoc(finRef);
+  currentFinanceDoc = updatedSnap.data();
+  setSummary(currentFinanceDoc);
 
   if (adminViewingUid === uid || currentUser?.uid === uid) {
-    const newFinSnap = await getDoc(finRef);
-    setSummary(newFinSnap.data());
     await loadActivity(uid);
   }
+
+  await loadAdminOperators();
 }
 
 async function applyInterest(uid) {
@@ -599,20 +625,27 @@ async function applyInterest(uid) {
     createdAt: serverTimestamp()
   });
 
-  if (currentUserDoc?.rol === "admin") {
-    await loadAdminOperators();
-  }
+  const updatedSnap = await getDoc(finRef);
+  currentFinanceDoc = updatedSnap.data();
+  setSummary(currentFinanceDoc);
 
   if (adminViewingUid === uid || currentUser?.uid === uid) {
-    const newFinSnap = await getDoc(finRef);
-    setSummary(newFinSnap.data());
     await loadActivity(uid);
   }
+
+  await loadAdminOperators();
 }
 
-/* =========================
-   ACTION MODAL
-========================= */
+/* =========================================================
+   MODAL DE ACCIONES
+========================================================= */
+function resetActionFields() {
+  actionAmount.value = "";
+  actionWeek.value = "";
+  actionNote.value = "";
+  actionMsg.textContent = "";
+}
+
 function openAction(type) {
   currentAction = type;
   resetActionFields();
@@ -643,13 +676,6 @@ function openAction(type) {
   }
 
   openModal(actionModal);
-}
-
-function resetActionFields() {
-  actionAmount.value = "";
-  actionWeek.value = "";
-  actionNote.value = "";
-  actionMsg.textContent = "";
 }
 
 async function saveAction() {
@@ -761,8 +787,9 @@ async function saveAction() {
 
   closeModal(actionModal);
 
-  const newFinSnap = await getDoc(finRef);
-  setSummary(newFinSnap.data());
+  const updatedSnap = await getDoc(finRef);
+  currentFinanceDoc = updatedSnap.data();
+  setSummary(currentFinanceDoc);
   await loadActivity(targetUid);
 
   if (currentUserDoc?.rol === "admin") {
@@ -770,9 +797,9 @@ async function saveAction() {
   }
 }
 
-/* =========================
+/* =========================================================
    AUTH STATE
-========================= */
+========================================================= */
 onAuthStateChanged(auth, async (user) => {
   currentUser = user;
 
@@ -781,23 +808,29 @@ onAuthStateChanged(auth, async (user) => {
     panelTitle.textContent = "PANEL PERSONAL";
     panelSubtitle.textContent = "Vista general de tu información financiera";
     secureSessionText.textContent = "🔒 Sesión cerrada";
-    hide(logoutBtn);
+
+    hide(personalPanel);
     hide(adminPanel);
+    hide(logoutBtn);
+
     document.querySelectorAll(".admin-only").forEach(el => hide(el));
-    clearSummary();
-    activityList.innerHTML = `<div class="empty-state">Inicia sesión para ver actividad.</div>`;
+
     currentUserDoc = null;
     currentFinanceDoc = null;
     adminViewingUid = null;
+    amountsVisible = false;
+
+    clearSummary();
+    activityList.innerHTML = <div class="empty-state">Inicia sesión para ver actividad.</div>;
     return;
   }
 
   await loadCurrentPanel(user.uid);
 });
 
-/* =========================
+/* =========================================================
    EVENTS
-========================= */
+========================================================= */
 openRegisterBtn.addEventListener("click", () => {
   registerMsg.textContent = "";
   openModal(registerModal);
@@ -835,16 +868,19 @@ markReviewedBtn.addEventListener("click", async () => {
   await reviewWeek(targetUid);
 });
 
-toggleAmountsBtn.addEventListener("click", () => {
+toggleAmountsBtn.addEventListener("click", async () => {
   amountsVisible = !amountsVisible;
   if (currentFinanceDoc) setSummary(currentFinanceDoc);
-  if (currentUser) loadActivity(adminViewingUid || currentUser.uid);
+  if (currentUser) {
+    const targetUid = adminViewingUid || currentUser.uid;
+    await loadActivity(targetUid);
+  }
 });
 
 reloadOperatorsBtn.addEventListener("click", loadAdminOperators);
 searchOperatorInput.addEventListener("input", loadAdminOperators);
 
-/* =========================
+/* =========================================================
    INIT
-========================= */
-loadProfiles();
+========================================================= */
+await loadProfiles();
