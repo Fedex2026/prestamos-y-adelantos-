@@ -22,19 +22,19 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
 /* =========================================================
-   1) PEGA AQUÍ TU CONFIG DE FIREBASE
+   1) FIREBASE CONFIG
 ========================================================= */
-const firebaseConfig = { 
-  apiKey : "AIzaSyA2NnujJ6mhHGkE96tD5Wu7b9_TqL5xVz8" , 
-  authDomain : "prestamos-y-adelantos-c5c7e.firebaseapp.com" , 
-  projectId : "prestamos-y-adelantos-c5c7e" , 
-  storageBucket : "prestamos-y-adelantos-c5c7e.firebasestorage.app" , 
-  messagingSenderId : "357105218615" , 
-  appId : "1:357105218615:web:855dc31356f4f06ef7bbb2" 
+const firebaseConfig = {
+  apiKey: "AIzaSyA2NnujJ6mhHGkE96tD5Wu7b9_TqL5xVz8",
+  authDomain: "prestamos-y-adelantos-c5c7e.firebaseapp.com",
+  projectId: "prestamos-y-adelantos-c5c7e",
+  storageBucket: "prestamos-y-adelantos-c5c7e.firebasestorage.app",
+  messagingSenderId: "357105218615",
+  appId: "1:357105218615:web:855dc31356f4f06ef7bbb2"
 };
 
 /* =========================================================
-   2) PON AQUÍ TU CORREO DE ADMIN
+   2) CORREOS ADMIN
 ========================================================= */
 const ADMIN_EMAILS = [
   "gruasmetro1@gmail.com"
@@ -141,7 +141,7 @@ function money(value = 0) {
 }
 
 function isAdmin(email = "") {
-  return ADMIN_EMAILS.includes(email.toLowerCase());
+  return ADMIN_EMAILS.includes(String(email).toLowerCase());
 }
 
 function getCurrentWeekLabel() {
@@ -152,7 +152,7 @@ function getCurrentWeekLabel() {
 }
 
 function getInitials(name = "") {
-  return name
+  return String(name)
     .split(" ")
     .filter(Boolean)
     .slice(0, 2)
@@ -161,11 +161,11 @@ function getInitials(name = "") {
 }
 
 function show(el) {
-  el.classList.remove("hidden");
+  if (el) el.classList.remove("hidden");
 }
 
 function hide(el) {
-  el.classList.add("hidden");
+  if (el) el.classList.add("hidden");
 }
 
 function openModal(el) {
@@ -178,21 +178,28 @@ function closeModal(el) {
 
 function setClock() {
   const now = new Date();
-  todayDate.textContent = now.toLocaleDateString("es-MX", {
-    day: "2-digit",
-    month: "long",
-    year: "numeric"
-  });
-  todayTime.textContent = now.toLocaleTimeString("es-MX", {
-    hour: "2-digit",
-    minute: "2-digit"
-  });
+
+  if (todayDate) {
+    todayDate.textContent = now.toLocaleDateString("es-MX", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric"
+    });
+  }
+
+  if (todayTime) {
+    todayTime.textContent = now.toLocaleTimeString("es-MX", {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit"
+    });
+  }
 }
 setClock();
 setInterval(setClock, 1000);
 
 function calcRestante(fin) {
-  return Number(fin.sueldo || 0) - Number(fin.adelantos || 0) - Number(fin.pago || 0);
+  return Number(fin?.sueldo || 0) - Number(fin?.adelantos || 0) - Number(fin?.pago || 0);
 }
 
 function renderMaskedOrValue(value) {
@@ -200,34 +207,36 @@ function renderMaskedOrValue(value) {
 }
 
 function clearSummary() {
-  mSueldo.textContent = "***";
-  mAdelantos.textContent = "***";
-  mPago.textContent = "***";
-  mDeuda.textContent = "***";
-  mRestante.textContent = "***";
-  mSemanaPagada.textContent = "No";
-  mSemanaCotejada.textContent = "No";
-  lastUpdatedText.textContent = "Actualizado: --";
+  if (mSueldo) mSueldo.textContent = "***";
+  if (mAdelantos) mAdelantos.textContent = "***";
+  if (mPago) mPago.textContent = "***";
+  if (mDeuda) mDeuda.textContent = "***";
+  if (mRestante) mRestante.textContent = "***";
+  if (mSemanaPagada) mSemanaPagada.textContent = "No";
+  if (mSemanaCotejada) mSemanaCotejada.textContent = "No";
+  if (lastUpdatedText) lastUpdatedText.textContent = "Actualizado: --";
 }
 
 function setSummary(fin) {
   if (!fin) return;
 
-  mSueldo.textContent = renderMaskedOrValue(fin.sueldo || 0);
-  mAdelantos.textContent = renderMaskedOrValue(fin.adelantos || 0);
-  mPago.textContent = renderMaskedOrValue(fin.pago || 0);
-  mDeuda.textContent = renderMaskedOrValue(fin.deuda || 0);
-  mRestante.textContent = renderMaskedOrValue(calcRestante(fin));
-  mSemanaPagada.textContent = fin.semanaMarcada ? "Sí" : "No";
-  mSemanaCotejada.textContent = fin.semanaCotejada ? "Sí" : "No";
-  lastUpdatedText.textContent = `Actualizado: ${new Date().toLocaleString("es-MX")}`;
+  if (mSueldo) mSueldo.textContent = renderMaskedOrValue(fin.sueldo || 0);
+  if (mAdelantos) mAdelantos.textContent = renderMaskedOrValue(fin.adelantos || 0);
+  if (mPago) mPago.textContent = renderMaskedOrValue(fin.pago || 0);
+  if (mDeuda) mDeuda.textContent = renderMaskedOrValue(fin.deuda || 0);
+  if (mRestante) mRestante.textContent = renderMaskedOrValue(calcRestante(fin));
+  if (mSemanaPagada) mSemanaPagada.textContent = fin.semanaMarcada ? "Sí" : "No";
+  if (mSemanaCotejada) mSemanaCotejada.textContent = fin.semanaCotejada ? "Sí" : "No";
+  if (lastUpdatedText) {
+    lastUpdatedText.textContent = `Actualizado: ${new Date().toLocaleString("es-MX")}`;
+  }
 }
 
 function resetActionFields() {
-  actionAmount.value = "";
-  actionWeek.value = "";
-  actionNote.value = "";
-  actionMsg.textContent = "";
+  if (actionAmount) actionAmount.value = "";
+  if (actionWeek) actionWeek.value = "";
+  if (actionNote) actionNote.value = "";
+  if (actionMsg) actionMsg.textContent = "";
 }
 
 function escapeHtml(str = "") {
@@ -243,75 +252,84 @@ function escapeHtml(str = "") {
    PERFIL PÚBLICO
 ========================================================= */
 async function loadProfiles() {
-  profilesGrid.innerHTML = `<div class="empty-state">Cargando operadores...</div>`;
+  try {
+    if (!profilesGrid) return;
 
-  const snap = await getDocs(collection(db, "usuarios"));
-  const operadores = [];
+    profilesGrid.innerHTML = `<div class="empty-state">Cargando operadores...</div>`;
 
-  snap.forEach(docSnap => {
-    const data = docSnap.data();
-    if (data.rol === "operador") operadores.push(data);
-  });
+    const snap = await getDocs(collection(db, "usuarios"));
+    const operadores = [];
 
-  if (!operadores.length) {
-    profilesGrid.innerHTML = `<div class="empty-state">Aún no hay operadores registrados.</div>`;
-    return;
-  }
-
-  profilesGrid.innerHTML = "";
-
-  operadores.forEach((u, index) => {
-    const tone = index % 2 === 0 ? "green" : "purple";
-
-    const card = document.createElement("div");
-    card.className = `profile-card ${tone}`;
-    card.innerHTML = `
-      <div class="profile-top">
-        <div class="avatar-wrap">
-          <div class="avatar">${getInitials(u.nombre)}</div>
-          <div>
-            <div class="profile-name">${escapeHtml(u.nombre)}</div>
-            <div class="tag ${tone}">ACTIVO</div>
-            <div class="profile-info">
-              <div>Rol: Operador</div>
-              <div>Panel privado y seguro</div>
-              <div>Acceso exclusivo</div>
-            </div>
-          </div>
-        </div>
-        <div class="finger">🔐</div>
-      </div>
-      <button class="enter-btn ${tone}">INGRESAR A MI PANEL →</button>
-    `;
-
-    card.addEventListener("click", () => {
-      loginEmail.value = u.email || "";
-      loginPassword.value = "";
-      loginMsg.textContent = "";
-      openModal(loginModal);
+    snap.forEach(docSnap => {
+      const data = docSnap.data();
+      if (data.rol === "operador") operadores.push(data);
     });
 
-    profilesGrid.appendChild(card);
-  });
+    if (!operadores.length) {
+      profilesGrid.innerHTML = `<div class="empty-state">Aún no hay operadores registrados.</div>`;
+      return;
+    }
+
+    profilesGrid.innerHTML = "";
+
+    operadores.forEach((u, index) => {
+      const tone = index % 2 === 0 ? "green" : "purple";
+
+      const card = document.createElement("div");
+      card.className = `profile-card ${tone}`;
+      card.innerHTML = `
+        <div class="profile-top">
+          <div class="avatar-wrap">
+            <div class="avatar">${getInitials(u.nombre)}</div>
+            <div>
+              <div class="profile-name">${escapeHtml(u.nombre)}</div>
+              <div class="tag ${tone}">ACTIVO</div>
+              <div class="profile-info">
+                <div>Rol: Operador</div>
+                <div>Panel privado y seguro</div>
+                <div>Acceso exclusivo</div>
+              </div>
+            </div>
+          </div>
+          <div class="finger">🔐</div>
+        </div>
+        <button class="enter-btn ${tone}">INGRESAR A MI PANEL →</button>
+      `;
+
+      card.addEventListener("click", () => {
+        if (loginEmail) loginEmail.value = u.email || "";
+        if (loginPassword) loginPassword.value = "";
+        if (loginMsg) loginMsg.textContent = "";
+        openModal(loginModal);
+      });
+
+      profilesGrid.appendChild(card);
+    });
+  } catch (error) {
+    console.error("Error cargando perfiles:", error);
+    if (profilesGrid) {
+      profilesGrid.innerHTML = `<div class="empty-state">No se pudieron cargar los operadores.</div>`;
+    }
+  }
 }
 
 /* =========================================================
    REGISTRO
 ========================================================= */
 async function registerOperator() {
-  registerMsg.textContent = "";
+  if (registerMsg) registerMsg.textContent = "";
 
-  const name = registerName.value.trim();
-  const email = registerEmail.value.trim().toLowerCase();
-  const password = registerPassword.value.trim();
+  const name = registerName?.value.trim() || "";
+  const email = registerEmail?.value.trim().toLowerCase() || "";
+  const password = registerPassword?.value.trim() || "";
 
   if (!name || !email || !password) {
-    registerMsg.textContent = "Completa todos los campos.";
+    if (registerMsg) registerMsg.textContent = "Completa todos los campos.";
     return;
   }
 
   if (password.length < 6) {
-    registerMsg.textContent = "La contraseña debe tener mínimo 6 caracteres.";
+    if (registerMsg) registerMsg.textContent = "La contraseña debe tener mínimo 6 caracteres.";
     return;
   }
 
@@ -340,17 +358,22 @@ async function registerOperator() {
       updatedAt: serverTimestamp()
     });
 
-    registerMsg.style.color = "#20d38a";
-    registerMsg.textContent = "Operador creado correctamente.";
+    if (registerMsg) {
+      registerMsg.style.color = "#20d38a";
+      registerMsg.textContent = "Operador creado correctamente.";
+    }
 
-    registerName.value = "";
-    registerEmail.value = "";
-    registerPassword.value = "";
+    if (registerName) registerName.value = "";
+    if (registerEmail) registerEmail.value = "";
+    if (registerPassword) registerPassword.value = "";
 
     await loadProfiles();
   } catch (error) {
-    registerMsg.style.color = "#ff9cab";
-    registerMsg.textContent = error.message;
+    console.error("Error al registrar:", error);
+    if (registerMsg) {
+      registerMsg.style.color = "#ff9cab";
+      registerMsg.textContent = error.message || "No se pudo registrar el operador.";
+    }
   }
 }
 
@@ -358,27 +381,34 @@ async function registerOperator() {
    LOGIN / LOGOUT
 ========================================================= */
 async function loginUser() {
-  loginMsg.textContent = "";
+  if (loginMsg) loginMsg.textContent = "";
 
-  const email = loginEmail.value.trim().toLowerCase();
-  const password = loginPassword.value.trim();
+  const email = loginEmail?.value.trim().toLowerCase() || "";
+  const password = loginPassword?.value.trim() || "";
 
   if (!email || !password) {
-    loginMsg.textContent = "Escribe correo y contraseña.";
+    if (loginMsg) loginMsg.textContent = "Escribe correo y contraseña.";
     return;
   }
 
   try {
     await signInWithEmailAndPassword(auth, email, password);
     closeModal(loginModal);
-    loginPassword.value = "";
+    if (loginPassword) loginPassword.value = "";
   } catch (error) {
-    loginMsg.textContent = "No se pudo iniciar sesión. Revisa correo y contraseña.";
+    console.error("Error al iniciar sesión:", error);
+    if (loginMsg) {
+      loginMsg.textContent = "No se pudo iniciar sesión. Revisa correo y contraseña.";
+    }
   }
 }
 
 async function logoutUser() {
-  await signOut(auth);
+  try {
+    await signOut(auth);
+  } catch (error) {
+    console.error("Error al cerrar sesión:", error);
+  }
 }
 
 /* =========================================================
@@ -393,19 +423,29 @@ async function loadCurrentPanel(uid) {
   currentUserDoc = userSnap.data();
   currentFinanceDoc = finSnap.data();
 
-  sessionStatus.textContent = currentUserDoc.rol === "admin"
-    ? "Admin"
-    : currentUserDoc.nombre;
+  if (sessionStatus) {
+    sessionStatus.textContent = currentUserDoc.rol === "admin"
+      ? "Admin"
+      : currentUserDoc.nombre;
+  }
 
-  panelTitle.textContent = `PANEL DE ${currentUserDoc.nombre.toUpperCase()}`;
-  panelSubtitle.textContent = currentUserDoc.rol === "admin"
-    ? "Control general y edición administrativa"
-    : "Vista general de tu información financiera";
+  if (panelTitle) {
+    panelTitle.textContent = `PANEL DE ${currentUserDoc.nombre.toUpperCase()}`;
+  }
 
-  secureSessionText.textContent = currentUserDoc.rol === "admin"
-    ? "🔐 Sesión segura (Admin)"
-    : "🔒 Sesión segura";
+  if (panelSubtitle) {
+    panelSubtitle.textContent = currentUserDoc.rol === "admin"
+      ? "Control general y edición administrativa"
+      : "Vista general de tu información financiera";
+  }
 
+  if (secureSessionText) {
+    secureSessionText.textContent = currentUserDoc.rol === "admin"
+      ? "🔐 Sesión segura (Admin)"
+      : "🔒 Sesión segura";
+  }
+
+  hide(publicPanel);
   show(personalPanel);
   show(logoutBtn);
   setSummary(currentFinanceDoc);
@@ -426,128 +466,146 @@ async function loadCurrentPanel(uid) {
 }
 
 async function loadActivity(uid) {
-  activityList.innerHTML = `<div class="empty-state">Cargando actividad...</div>`;
+  try {
+    if (!activityList) return;
 
-  const qRef = query(collection(db, "movimientos"), where("uid", "==", uid));
-  const snap = await getDocs(qRef);
+    activityList.innerHTML = `<div class="empty-state">Cargando actividad...</div>`;
 
-  const movements = [];
-  snap.forEach(docSnap => movements.push({ id: docSnap.id, ...docSnap.data() }));
+    const qRef = query(collection(db, "movimientos"), where("uid", "==", uid));
+    const snap = await getDocs(qRef);
 
-  movements.sort((a, b) => {
-    const at = a.createdAt?.seconds || 0;
-    const bt = b.createdAt?.seconds || 0;
-    return bt - at;
-  });
+    const movements = [];
+    snap.forEach(docSnap => movements.push({ id: docSnap.id, ...docSnap.data() }));
 
-  if (!movements.length) {
-    activityList.innerHTML = `<div class="empty-state">No hay movimientos registrados.</div>`;
-    return;
+    movements.sort((a, b) => {
+      const at = a.createdAt?.seconds || 0;
+      const bt = b.createdAt?.seconds || 0;
+      return bt - at;
+    });
+
+    if (!movements.length) {
+      activityList.innerHTML = `<div class="empty-state">No hay movimientos registrados.</div>`;
+      return;
+    }
+
+    activityList.innerHTML = "";
+
+    movements.slice(0, 10).forEach(mov => {
+      const div = document.createElement("div");
+      div.className = "activity-item";
+      div.innerHTML = `
+        <div>
+          <div class="activity-title">${escapeHtml(mov.tipo || "Movimiento")}</div>
+          <div class="activity-sub">
+            ${escapeHtml(mov.nota || "Sin nota")}<br>
+            Semana: ${escapeHtml(mov.semana || "--")}<br>
+            Estado: ${escapeHtml(mov.estado || "registrado")}
+          </div>
+        </div>
+        <div class="activity-right">
+          <div>${amountsVisible ? money(mov.monto || 0) : "$**"}</div>
+          <div style="margin-top:4px;">
+            ${mov.createdAt?.toDate ? mov.createdAt.toDate().toLocaleString("es-MX") : "--"}
+          </div>
+        </div>
+      `;
+      activityList.appendChild(div);
+    });
+  } catch (error) {
+    console.error("Error cargando actividad:", error);
+    if (activityList) {
+      activityList.innerHTML = `<div class="empty-state">No se pudo cargar la actividad.</div>`;
+    }
   }
-
-  activityList.innerHTML = "";
-
-  movements.slice(0, 10).forEach(mov => {
-    const div = document.createElement("div");
-    div.className = "activity-item";
-    div.innerHTML = `
-      <div>
-        <div class="activity-title">${escapeHtml(mov.tipo || "Movimiento")}</div>
-        <div class="activity-sub">
-          ${escapeHtml(mov.nota || "Sin nota")}<br>
-          Semana: ${escapeHtml(mov.semana || "--")}<br>
-          Estado: ${escapeHtml(mov.estado || "registrado")}
-        </div>
-      </div>
-      <div class="activity-right">
-        <div>${amountsVisible ? money(mov.monto || 0) : "$**"}</div>
-        <div style="margin-top:4px;">
-          ${mov.createdAt?.toDate ? mov.createdAt.toDate().toLocaleString("es-MX") : "--"}
-        </div>
-      </div>
-    `;
-    activityList.appendChild(div);
-  });
 }
 
 /* =========================================================
    PANEL ADMIN
 ========================================================= */
 async function loadAdminOperators() {
-  adminOperatorsList.innerHTML = `<div class="empty-state">Cargando operadores...</div>`;
+  try {
+    if (!adminOperatorsList) return;
 
-  const snap = await getDocs(collection(db, "usuarios"));
-  const users = [];
+    adminOperatorsList.innerHTML = `<div class="empty-state">Cargando operadores...</div>`;
 
-  snap.forEach(docSnap => {
-    const data = docSnap.data();
-    if (data.rol === "operador") users.push(data);
-  });
+    const snap = await getDocs(collection(db, "usuarios"));
+    const users = [];
 
-  const filter = searchOperatorInput.value.trim().toLowerCase();
-  const filtered = users.filter(u =>
-    u.nombre.toLowerCase().includes(filter) ||
-    u.email.toLowerCase().includes(filter)
-  );
-
-  if (!filtered.length) {
-    adminOperatorsList.innerHTML = `<div class="empty-state">No se encontraron operadores.</div>`;
-    return;
-  }
-
-  adminOperatorsList.innerHTML = "";
-
-  for (const user of filtered) {
-    const finSnap = await getDoc(doc(db, "finanzas", user.uid));
-    const fin = finSnap.exists() ? finSnap.data() : null;
-
-    const card = document.createElement("div");
-    card.className = "operator-card-admin";
-    card.innerHTML = `
-      <div class="operator-info">
-        <h3>${escapeHtml(user.nombre)}</h3>
-        <p>${escapeHtml(user.email)}</p>
-        <p>Sueldo: ${fin ? money(fin.sueldo || 0) : "$0.00"}</p>
-        <p>Deuda: ${fin ? money(fin.deuda || 0) : "$0.00"}</p>
-        <p>Semana marcada: ${fin?.semanaMarcada ? "Sí" : "No"} / Cotejada: ${fin?.semanaCotejada ? "Sí" : "No"}</p>
-      </div>
-      <div class="operator-actions">
-        <button class="btn btn-login" data-action="open" data-uid="${user.uid}">Abrir panel</button>
-        <button class="btn btn-outline" data-action="salary" data-uid="${user.uid}">Actualizar sueldo</button>
-        <button class="btn btn-outline" data-action="review" data-uid="${user.uid}">Cotejar semana</button>
-        <button class="btn btn-outline" data-action="interest" data-uid="${user.uid}">Aplicar interés</button>
-      </div>
-    `;
-
-    adminOperatorsList.appendChild(card);
-  }
-
-  adminOperatorsList.querySelectorAll("button").forEach(btn => {
-    btn.addEventListener("click", async () => {
-      const uid = btn.dataset.uid;
-      const action = btn.dataset.action;
-
-      if (action === "open") {
-        adminViewingUid = uid;
-        await openAdminView(uid);
-      }
-
-      if (action === "salary") {
-        adminViewingUid = uid;
-        openAction("salary");
-      }
-
-      if (action === "review") {
-        adminViewingUid = uid;
-        await reviewWeek(uid);
-      }
-
-      if (action === "interest") {
-        adminViewingUid = uid;
-        await applyInterest(uid);
-      }
+    snap.forEach(docSnap => {
+      const data = docSnap.data();
+      if (data.rol === "operador") users.push(data);
     });
-  });
+
+    const filter = searchOperatorInput?.value.trim().toLowerCase() || "";
+    const filtered = users.filter(u =>
+      (u.nombre || "").toLowerCase().includes(filter) ||
+      (u.email || "").toLowerCase().includes(filter)
+    );
+
+    if (!filtered.length) {
+      adminOperatorsList.innerHTML = `<div class="empty-state">No se encontraron operadores.</div>`;
+      return;
+    }
+
+    adminOperatorsList.innerHTML = "";
+
+    for (const user of filtered) {
+      const finSnap = await getDoc(doc(db, "finanzas", user.uid));
+      const fin = finSnap.exists() ? finSnap.data() : null;
+
+      const card = document.createElement("div");
+      card.className = "operator-card-admin";
+      card.innerHTML = `
+        <div class="operator-info">
+          <h3>${escapeHtml(user.nombre)}</h3>
+          <p>${escapeHtml(user.email)}</p>
+          <p>Sueldo: ${fin ? money(fin.sueldo || 0) : "$0.00"}</p>
+          <p>Deuda: ${fin ? money(fin.deuda || 0) : "$0.00"}</p>
+          <p>Semana marcada: ${fin?.semanaMarcada ? "Sí" : "No"} / Cotejada: ${fin?.semanaCotejada ? "Sí" : "No"}</p>
+        </div>
+        <div class="operator-actions">
+          <button class="btn btn-login" data-action="open" data-uid="${user.uid}">Abrir panel</button>
+          <button class="btn btn-outline" data-action="salary" data-uid="${user.uid}">Actualizar sueldo</button>
+          <button class="btn btn-outline" data-action="review" data-uid="${user.uid}">Cotejar semana</button>
+          <button class="btn btn-outline" data-action="interest" data-uid="${user.uid}">Aplicar interés</button>
+        </div>
+      `;
+
+      adminOperatorsList.appendChild(card);
+    }
+
+    adminOperatorsList.querySelectorAll("button").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        const uid = btn.dataset.uid;
+        const action = btn.dataset.action;
+
+        if (action === "open") {
+          adminViewingUid = uid;
+          await openAdminView(uid);
+        }
+
+        if (action === "salary") {
+          adminViewingUid = uid;
+          openAction("salary");
+        }
+
+        if (action === "review") {
+          adminViewingUid = uid;
+          await reviewWeek(uid);
+        }
+
+        if (action === "interest") {
+          adminViewingUid = uid;
+          await applyInterest(uid);
+        }
+      });
+    });
+  } catch (error) {
+    console.error("Error cargando operadores admin:", error);
+    if (adminOperatorsList) {
+      adminOperatorsList.innerHTML = `<div class="empty-state">No se pudieron cargar los operadores.</div>`;
+    }
+  }
 }
 
 async function openAdminView(uid) {
@@ -559,8 +617,8 @@ async function openAdminView(uid) {
   const user = userSnap.data();
   const fin = finSnap.data();
 
-  panelTitle.textContent = `ADMIN VIENDO: ${user.nombre.toUpperCase()}`;
-  panelSubtitle.textContent = `Operador: ${user.email}`;
+  if (panelTitle) panelTitle.textContent = `ADMIN VIENDO: ${user.nombre.toUpperCase()}`;
+  if (panelSubtitle) panelSubtitle.textContent = `Operador: ${user.email}`;
   currentFinanceDoc = fin;
 
   setSummary(fin);
@@ -568,87 +626,90 @@ async function openAdminView(uid) {
 }
 
 async function reviewWeek(uid) {
-  const finRef = doc(db, "finanzas", uid);
-  const finSnap = await getDoc(finRef);
-  if (!finSnap.exists()) return;
+  try {
+    const finRef = doc(db, "finanzas", uid);
+    const finSnap = await getDoc(finRef);
+    if (!finSnap.exists()) return;
 
-  const fin = finSnap.data();
+    const fin = finSnap.data();
 
-  await updateDoc(finRef, {
-    semanaCotejada: true,
-    updatedAt: serverTimestamp()
-  });
+    await updateDoc(finRef, {
+      semanaCotejada: true,
+      updatedAt: serverTimestamp()
+    });
 
-  await addDoc(collection(db, "movimientos"), {
-    uid,
-    tipo: "Semana cotejada",
-    monto: 0,
-    semana: fin.semanaActual || getCurrentWeekLabel(),
-    nota: "Cotejada por administrador",
-    estado: "aprobado",
-    createdAt: serverTimestamp()
-  });
+    await addDoc(collection(db, "movimientos"), {
+      uid,
+      tipo: "Semana cotejada",
+      monto: 0,
+      semana: fin.semanaActual || getCurrentWeekLabel(),
+      nota: "Cotejada por administrador",
+      estado: "aprobado",
+      createdAt: serverTimestamp()
+    });
 
-  const updatedSnap = await getDoc(finRef);
-  currentFinanceDoc = updatedSnap.data();
-  setSummary(currentFinanceDoc);
+    const updatedSnap = await getDoc(finRef);
+    currentFinanceDoc = updatedSnap.data();
+    setSummary(currentFinanceDoc);
 
-  if (adminViewingUid === uid || currentUser?.uid === uid) {
-    await loadActivity(uid);
+    if (adminViewingUid === uid || currentUser?.uid === uid) {
+      await loadActivity(uid);
+    }
+
+    await loadAdminOperators();
+  } catch (error) {
+    console.error("Error cotejando semana:", error);
   }
-
-  await loadAdminOperators();
 }
 
 async function applyInterest(uid) {
-  const finRef = doc(db, "finanzas", uid);
-  const finSnap = await getDoc(finRef);
-  if (!finSnap.exists()) return;
+  try {
+    const finRef = doc(db, "finanzas", uid);
+    const finSnap = await getDoc(finRef);
+    if (!finSnap.exists()) return;
 
-  const fin = finSnap.data();
-  const currentDebt = Number(fin.deuda || 0);
-  const interest = +(currentDebt * 0.10).toFixed(2);
-  const newDebt = +(currentDebt + interest).toFixed(2);
+    const fin = finSnap.data();
+    const currentDebt = Number(fin.deuda || 0);
+    const interest = +(currentDebt * 0.10).toFixed(2);
+    const newDebt = +(currentDebt + interest).toFixed(2);
 
-  await updateDoc(finRef, {
-    deuda: newDebt,
-    updatedAt: serverTimestamp()
-  });
+    await updateDoc(finRef, {
+      deuda: newDebt,
+      updatedAt: serverTimestamp()
+    });
 
-  await addDoc(collection(db, "movimientos"), {
-    uid,
-    tipo: "Interés aplicado",
-    monto: interest,
-    semana: fin.semanaActual || getCurrentWeekLabel(),
-    nota: "Interés mensual del 10%",
-    estado: "aprobado",
-    createdAt: serverTimestamp()
-  });
+    await addDoc(collection(db, "movimientos"), {
+      uid,
+      tipo: "Interés aplicado",
+      monto: interest,
+      semana: fin.semanaActual || getCurrentWeekLabel(),
+      nota: "Interés mensual del 10%",
+      estado: "aprobado",
+      createdAt: serverTimestamp()
+    });
 
-  const updatedSnap = await getDoc(finRef);
-  currentFinanceDoc = updatedSnap.data();
-  setSummary(currentFinanceDoc);
+    const updatedSnap = await getDoc(finRef);
+    currentFinanceDoc = updatedSnap.data();
+    setSummary(currentFinanceDoc);
 
-  if (adminViewingUid === uid || currentUser?.uid === uid) {
-    await loadActivity(uid);
+    if (adminViewingUid === uid || currentUser?.uid === uid) {
+      await loadActivity(uid);
+    }
+
+    await loadAdminOperators();
+  } catch (error) {
+    console.error("Error aplicando interés:", error);
   }
-
-  await loadAdminOperators();
 }
 
 /* =========================================================
    MODAL DE ACCIONES
 ========================================================= */
-function resetActionFields() {
-  actionAmount.value = "";
-  actionWeek.value = "";
-  actionNote.value = "";
-  actionMsg.textContent = "";
-}
-
 function openAction(type) {
   currentAction = type;
   resetActionFields();
+
+  if (!actionTitle || !actionSubtitle) return;
 
   if (type === "advance") {
     actionTitle.textContent = "Solicitar adelanto";
@@ -666,7 +727,9 @@ function openAction(type) {
     actionTitle.textContent = "Registrar pago";
     actionSubtitle.textContent = "Esto marcará toda la semana para cotejo del admin.";
     show(weekFieldWrap);
-    actionWeek.value = currentFinanceDoc?.semanaActual || getCurrentWeekLabel();
+    if (actionWeek) {
+      actionWeek.value = currentFinanceDoc?.semanaActual || getCurrentWeekLabel();
+    }
   }
 
   if (type === "salary") {
@@ -679,121 +742,129 @@ function openAction(type) {
 }
 
 async function saveAction() {
-  actionMsg.textContent = "";
+  if (actionMsg) actionMsg.textContent = "";
 
-  const amount = Number(actionAmount.value || 0);
-  const note = actionNote.value.trim();
-  const week = actionWeek.value.trim() || getCurrentWeekLabel();
+  const amount = Number(actionAmount?.value || 0);
+  const note = actionNote?.value.trim() || "";
+  const week = actionWeek?.value.trim() || getCurrentWeekLabel();
 
   const targetUid = (currentUserDoc?.rol === "admin" && adminViewingUid)
     ? adminViewingUid
     : currentUser?.uid;
 
   if (!targetUid) {
-    actionMsg.textContent = "No hay usuario seleccionado.";
+    if (actionMsg) actionMsg.textContent = "No hay usuario seleccionado.";
     return;
   }
 
   if (amount <= 0) {
-    actionMsg.textContent = "Escribe un monto válido.";
+    if (actionMsg) actionMsg.textContent = "Escribe un monto válido.";
     return;
   }
 
-  const finRef = doc(db, "finanzas", targetUid);
-  const finSnap = await getDoc(finRef);
-  if (!finSnap.exists()) {
-    actionMsg.textContent = "No se encontró el panel financiero.";
-    return;
-  }
+  try {
+    const finRef = doc(db, "finanzas", targetUid);
+    const finSnap = await getDoc(finRef);
 
-  const fin = finSnap.data();
+    if (!finSnap.exists()) {
+      if (actionMsg) actionMsg.textContent = "No se encontró el panel financiero.";
+      return;
+    }
 
-  if (currentAction === "advance") {
-    await updateDoc(finRef, {
-      adelantos: Number(fin.adelantos || 0) + amount,
-      updatedAt: serverTimestamp()
-    });
+    const fin = finSnap.data();
 
-    await addDoc(collection(db, "movimientos"), {
-      uid: targetUid,
-      tipo: "Adelanto",
-      monto: amount,
-      semana: fin.semanaActual || getCurrentWeekLabel(),
-      nota: note || "Adelanto registrado",
-      estado: "aprobado",
-      createdAt: serverTimestamp()
-    });
-  }
+    if (currentAction === "advance") {
+      await updateDoc(finRef, {
+        adelantos: Number(fin.adelantos || 0) + amount,
+        updatedAt: serverTimestamp()
+      });
 
-  if (currentAction === "loan") {
-    await updateDoc(finRef, {
-      deuda: Number(fin.deuda || 0) + amount,
-      updatedAt: serverTimestamp()
-    });
+      await addDoc(collection(db, "movimientos"), {
+        uid: targetUid,
+        tipo: "Adelanto",
+        monto: amount,
+        semana: fin.semanaActual || getCurrentWeekLabel(),
+        nota: note || "Adelanto registrado",
+        estado: "aprobado",
+        createdAt: serverTimestamp()
+      });
+    }
 
-    await addDoc(collection(db, "movimientos"), {
-      uid: targetUid,
-      tipo: "Préstamo",
-      monto: amount,
-      semana: fin.semanaActual || getCurrentWeekLabel(),
-      nota: note || "Préstamo registrado",
-      estado: "aprobado",
-      createdAt: serverTimestamp()
-    });
-  }
+    if (currentAction === "loan") {
+      await updateDoc(finRef, {
+        deuda: Number(fin.deuda || 0) + amount,
+        updatedAt: serverTimestamp()
+      });
 
-  if (currentAction === "payment") {
-    const currentDebt = Number(fin.deuda || 0);
-    const newDebt = Math.max(currentDebt - amount, 0);
-    const newPago = Number(fin.pago || 0) + amount;
+      await addDoc(collection(db, "movimientos"), {
+        uid: targetUid,
+        tipo: "Préstamo",
+        monto: amount,
+        semana: fin.semanaActual || getCurrentWeekLabel(),
+        nota: note || "Préstamo registrado",
+        estado: "aprobado",
+        createdAt: serverTimestamp()
+      });
+    }
 
-    await updateDoc(finRef, {
-      deuda: newDebt,
-      pago: newPago,
-      semanaMarcada: true,
-      semanaCotejada: false,
-      semanaActual: week,
-      updatedAt: serverTimestamp()
-    });
+    if (currentAction === "payment") {
+      const currentDebt = Number(fin.deuda || 0);
+      const newDebt = Math.max(currentDebt - amount, 0);
+      const newPago = Number(fin.pago || 0) + amount;
 
-    await addDoc(collection(db, "movimientos"), {
-      uid: targetUid,
-      tipo: "Pago",
-      monto: amount,
-      semana: week,
-      nota: note || "Pago registrado",
-      estado: "pendiente_cotejo",
-      createdAt: serverTimestamp()
-    });
-  }
+      await updateDoc(finRef, {
+        deuda: newDebt,
+        pago: newPago,
+        semanaMarcada: true,
+        semanaCotejada: false,
+        semanaActual: week,
+        updatedAt: serverTimestamp()
+      });
 
-  if (currentAction === "salary") {
-    await updateDoc(finRef, {
-      sueldo: amount,
-      semanaActual: getCurrentWeekLabel(),
-      updatedAt: serverTimestamp()
-    });
+      await addDoc(collection(db, "movimientos"), {
+        uid: targetUid,
+        tipo: "Pago",
+        monto: amount,
+        semana: week,
+        nota: note || "Pago registrado",
+        estado: "pendiente_cotejo",
+        createdAt: serverTimestamp()
+      });
+    }
 
-    await addDoc(collection(db, "movimientos"), {
-      uid: targetUid,
-      tipo: "Sueldo actualizado",
-      monto: amount,
-      semana: getCurrentWeekLabel(),
-      nota: note || "Sueldo semanal actualizado",
-      estado: "aprobado",
-      createdAt: serverTimestamp()
-    });
-  }
+    if (currentAction === "salary") {
+      await updateDoc(finRef, {
+        sueldo: amount,
+        semanaActual: getCurrentWeekLabel(),
+        updatedAt: serverTimestamp()
+      });
 
-  closeModal(actionModal);
+      await addDoc(collection(db, "movimientos"), {
+        uid: targetUid,
+        tipo: "Sueldo actualizado",
+        monto: amount,
+        semana: getCurrentWeekLabel(),
+        nota: note || "Sueldo semanal actualizado",
+        estado: "aprobado",
+        createdAt: serverTimestamp()
+      });
+    }
 
-  const updatedSnap = await getDoc(finRef);
-  currentFinanceDoc = updatedSnap.data();
-  setSummary(currentFinanceDoc);
-  await loadActivity(targetUid);
+    closeModal(actionModal);
 
-  if (currentUserDoc?.rol === "admin") {
-    await loadAdminOperators();
+    const updatedSnap = await getDoc(finRef);
+    currentFinanceDoc = updatedSnap.data();
+    setSummary(currentFinanceDoc);
+    await loadActivity(targetUid);
+
+    if (currentUserDoc?.rol === "admin") {
+      await loadAdminOperators();
+    }
+  } catch (error) {
+    console.error("Error guardando acción:", error);
+    if (actionMsg) {
+      actionMsg.textContent = "No se pudo guardar la acción.";
+    }
   }
 }
 
@@ -804,11 +875,12 @@ onAuthStateChanged(auth, async (user) => {
   currentUser = user;
 
   if (!user) {
-    sessionStatus.textContent = "Sin acceso";
-    panelTitle.textContent = "PANEL PERSONAL";
-    panelSubtitle.textContent = "Vista general de tu información financiera";
-    secureSessionText.textContent = "🔒 Sesión cerrada";
+    if (sessionStatus) sessionStatus.textContent = "Sin acceso";
+    if (panelTitle) panelTitle.textContent = "PANEL PERSONAL";
+    if (panelSubtitle) panelSubtitle.textContent = "Vista general de tu información financiera";
+    if (secureSessionText) secureSessionText.textContent = "🔒 Sesión cerrada";
 
+    show(publicPanel);
     hide(personalPanel);
     hide(adminPanel);
     hide(logoutBtn);
@@ -821,66 +893,124 @@ onAuthStateChanged(auth, async (user) => {
     amountsVisible = false;
 
     clearSummary();
-    activityList.innerHTML = `<div class="empty-state">Inicia sesión para ver actividad.</div>`;
+
+    if (activityList) {
+      activityList.innerHTML = `<div class="empty-state">Inicia sesión para ver actividad.</div>`;
+    }
+
     return;
   }
 
-  await loadCurrentPanel(user.uid);
+  try {
+    await loadCurrentPanel(user.uid);
+  } catch (error) {
+    console.error("Error cargando panel actual:", error);
+  }
 });
 
 /* =========================================================
    EVENTS
 ========================================================= */
-openRegisterBtn.addEventListener("click", () => {
-  registerMsg.textContent = "";
-  openModal(registerModal);
-});
+if (openRegisterBtn) {
+  openRegisterBtn.addEventListener("click", () => {
+    if (registerMsg) registerMsg.textContent = "";
+    openModal(registerModal);
+  });
+}
 
-openLoginBtn.addEventListener("click", () => {
-  loginMsg.textContent = "";
-  openModal(loginModal);
-});
+if (openLoginBtn) {
+  openLoginBtn.addEventListener("click", () => {
+    if (loginMsg) loginMsg.textContent = "";
+    openModal(loginModal);
+  });
+}
 
-closeRegisterBtn.addEventListener("click", () => closeModal(registerModal));
-closeLoginBtn.addEventListener("click", () => closeModal(loginModal));
-closeActionBtn.addEventListener("click", () => closeModal(actionModal));
+if (closeRegisterBtn) {
+  closeRegisterBtn.addEventListener("click", () => closeModal(registerModal));
+}
 
-confirmRegisterBtn.addEventListener("click", registerOperator);
-confirmLoginBtn.addEventListener("click", loginUser);
-confirmActionBtn.addEventListener("click", saveAction);
+if (closeLoginBtn) {
+  closeLoginBtn.addEventListener("click", () => closeModal(loginModal));
+}
 
-logoutBtn.addEventListener("click", logoutUser);
+if (closeActionBtn) {
+  closeActionBtn.addEventListener("click", () => closeModal(actionModal));
+}
 
-requestAdvanceBtn.addEventListener("click", () => openAction("advance"));
-requestLoanBtn.addEventListener("click", () => openAction("loan"));
-payDebtBtn.addEventListener("click", () => openAction("payment"));
-updateSalaryBtn.addEventListener("click", () => openAction("salary"));
+if (confirmRegisterBtn) {
+  confirmRegisterBtn.addEventListener("click", registerOperator);
+}
 
-applyInterestBtn.addEventListener("click", async () => {
-  const targetUid = adminViewingUid || currentUser?.uid;
-  if (!targetUid) return;
-  await applyInterest(targetUid);
-});
+if (confirmLoginBtn) {
+  confirmLoginBtn.addEventListener("click", loginUser);
+}
 
-markReviewedBtn.addEventListener("click", async () => {
-  const targetUid = adminViewingUid || currentUser?.uid;
-  if (!targetUid) return;
-  await reviewWeek(targetUid);
-});
+if (confirmActionBtn) {
+  confirmActionBtn.addEventListener("click", saveAction);
+}
 
-toggleAmountsBtn.addEventListener("click", async () => {
-  amountsVisible = !amountsVisible;
-  if (currentFinanceDoc) setSummary(currentFinanceDoc);
-  if (currentUser) {
-    const targetUid = adminViewingUid || currentUser.uid;
-    await loadActivity(targetUid);
-  }
-});
+if (logoutBtn) {
+  logoutBtn.addEventListener("click", logoutUser);
+}
 
-reloadOperatorsBtn.addEventListener("click", loadAdminOperators);
-searchOperatorInput.addEventListener("input", loadAdminOperators);
+if (requestAdvanceBtn) {
+  requestAdvanceBtn.addEventListener("click", () => openAction("advance"));
+}
+
+if (requestLoanBtn) {
+  requestLoanBtn.addEventListener("click", () => openAction("loan"));
+}
+
+if (payDebtBtn) {
+  payDebtBtn.addEventListener("click", () => openAction("payment"));
+}
+
+if (updateSalaryBtn) {
+  updateSalaryBtn.addEventListener("click", () => openAction("salary"));
+}
+
+if (applyInterestBtn) {
+  applyInterestBtn.addEventListener("click", async () => {
+    const targetUid = adminViewingUid || currentUser?.uid;
+    if (!targetUid) return;
+    await applyInterest(targetUid);
+  });
+}
+
+if (markReviewedBtn) {
+  markReviewedBtn.addEventListener("click", async () => {
+    const targetUid = adminViewingUid || currentUser?.uid;
+    if (!targetUid) return;
+    await reviewWeek(targetUid);
+  });
+}
+
+if (toggleAmountsBtn) {
+  toggleAmountsBtn.addEventListener("click", async () => {
+    amountsVisible = !amountsVisible;
+
+    if (currentFinanceDoc) setSummary(currentFinanceDoc);
+
+    if (currentUser) {
+      const targetUid = adminViewingUid || currentUser.uid;
+      await loadActivity(targetUid);
+    }
+  });
+}
+
+if (reloadOperatorsBtn) {
+  reloadOperatorsBtn.addEventListener("click", loadAdminOperators);
+}
+
+if (searchOperatorInput) {
+  searchOperatorInput.addEventListener("input", loadAdminOperators);
+}
 
 /* =========================================================
    INIT
 ========================================================= */
-await loadProfiles();
+try {
+  await loadProfiles();
+} catch (error) {
+  console.error("Error al iniciar app:", error);
+}
