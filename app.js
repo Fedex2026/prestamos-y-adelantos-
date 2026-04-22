@@ -1313,3 +1313,4 @@ try {
 } catch (error) {
   console.error("Error al iniciar app:", error);
 }
+checa y si no lo tiene agregalo y dame el codigo completo corregido
