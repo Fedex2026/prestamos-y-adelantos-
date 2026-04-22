@@ -34,7 +34,7 @@ const firebaseConfig = {
 };
 
 /* =========================================================
-   ADMIN
+   ADMINS
 ========================================================= */
 const ADMIN_EMAILS = [
   "gruasmetro1@gmail.com"
@@ -118,6 +118,7 @@ const payDebtBtn = document.getElementById("payDebtBtn");
 const updateSalaryBtn = document.getElementById("updateSalaryBtn");
 const applyInterestBtn = document.getElementById("applyInterestBtn");
 const markReviewedBtn = document.getElementById("markReviewedBtn");
+const closeWeekBtn = document.getElementById("closeWeekBtn");
 
 /* =========================================================
    STATE
@@ -126,7 +127,7 @@ let currentUser = null;
 let currentUserDoc = null;
 let currentFinanceDoc = null;
 let currentAction = null;
-let amountsVisible = false;
+let amountsVisible = true;
 let adminViewingUid = null;
 
 /* =========================================================
@@ -199,7 +200,7 @@ setClock();
 setInterval(setClock, 1000);
 
 function calcRestante(fin) {
-  return Number(fin?.sueldo || 0) - Number(fin?.adelantos || 0) - Number(fin?.pago || 0);
+  return Number(fin?.sueldo || 0) - Number(fin?.adelantos || 0);
 }
 
 function renderMaskedOrValue(value) {
@@ -567,7 +568,7 @@ async function loadActivity(uid) {
 
     activityList.innerHTML = "";
 
-    movements.slice(0, 10).forEach((mov) => {
+    movements.slice(0, 20).forEach((mov) => {
       const div = document.createElement("div");
       div.className = "activity-item";
       div.innerHTML = `
@@ -636,14 +637,16 @@ async function loadAdminOperators() {
           <h3>${escapeHtml(user.nombre)}</h3>
           <p>${escapeHtml(user.email)}</p>
           <p>Sueldo: ${money(finData.sueldo || 0)}</p>
-          <p>Deuda: ${money(finData.deuda || 0)}</p>
-          <p>Semana marcada: ${finData?.semanaMarcada ? "Sí" : "No"} / Cotejada: ${finData?.semanaCotejada ? "Sí" : "No"}</p>
+          <p>Adelantos semana: ${money(finData.adelantos || 0)}</p>
+          <p>Deuda préstamo: ${money(finData.deuda || 0)}</p>
+          <p>Semana pagada: ${finData?.semanaMarcada ? "Sí" : "No"} / Cotejada: ${finData?.semanaCotejada ? "Sí" : "No"}</p>
         </div>
         <div class="operator-actions">
           <button class="btn btn-login" data-action="open" data-uid="${user.uid}">Abrir panel</button>
           <button class="btn btn-outline" data-action="salary" data-uid="${user.uid}">Actualizar sueldo</button>
           <button class="btn btn-outline" data-action="review" data-uid="${user.uid}">Cotejar semana</button>
           <button class="btn btn-outline" data-action="interest" data-uid="${user.uid}">Aplicar interés</button>
+          <button class="btn btn-outline" data-action="closeweek" data-uid="${user.uid}">Cerrar semana</button>
         </div>
       `;
 
@@ -673,6 +676,11 @@ async function loadAdminOperators() {
         if (action === "interest") {
           adminViewingUid = uid;
           await applyInterest(uid);
+        }
+
+        if (action === "closeweek") {
+          adminViewingUid = uid;
+          await cerrarSemana(uid);
         }
       });
     });
@@ -784,6 +792,48 @@ async function applyInterest(uid) {
   }
 }
 
+async function cerrarSemana(uid) {
+  try {
+    const finRef = doc(db, "finanzas", uid);
+    const finSnap = await getDoc(finRef);
+    if (!finSnap.exists()) return;
+
+    const fin = finSnap.data();
+    const semanaCerrada = fin.semanaActual || getCurrentWeekLabel();
+
+    await updateDoc(finRef, {
+      adelantos: 0,
+      pago: 0,
+      semanaMarcada: false,
+      semanaCotejada: true,
+      semanaActual: getCurrentWeekLabel(),
+      updatedAt: serverTimestamp()
+    });
+
+    await addDoc(collection(db, "movimientos"), {
+      uid,
+      tipo: "Semana cerrada",
+      monto: 0,
+      semana: semanaCerrada,
+      nota: "Semana cerrada por administrador",
+      estado: "cerrado",
+      createdAt: serverTimestamp()
+    });
+
+    const updatedSnap = await getDoc(finRef);
+    currentFinanceDoc = updatedSnap.data();
+    setSummary(currentFinanceDoc);
+
+    if (adminViewingUid === uid || currentUser?.uid === uid) {
+      await loadActivity(uid);
+    }
+
+    await loadAdminOperators();
+  } catch (error) {
+    console.error("Error cerrando semana:", error);
+  }
+}
+
 /* =========================================================
    MODAL DE ACCIONES
 ========================================================= */
@@ -795,23 +845,20 @@ function openAction(type) {
 
   if (type === "advance") {
     actionTitle.textContent = "Solicitar adelanto";
-    actionSubtitle.textContent = "Se registrará como adelanto directo.";
+    actionSubtitle.textContent = "Este adelanto se sumará a la semana actual.";
     hide(weekFieldWrap);
   }
 
   if (type === "loan") {
     actionTitle.textContent = "Solicitar préstamo";
-    actionSubtitle.textContent = "Se registrará como préstamo directo.";
+    actionSubtitle.textContent = "Este préstamo aumentará la deuda total.";
     hide(weekFieldWrap);
   }
 
   if (type === "payment") {
     actionTitle.textContent = "Registrar pago";
-    actionSubtitle.textContent = "Esto marcará toda la semana para cotejo del admin.";
-    show(weekFieldWrap);
-    if (actionWeek) {
-      actionWeek.value = currentFinanceDoc?.semanaActual || getCurrentWeekLabel();
-    }
+    actionSubtitle.textContent = "Este pago bajará la deuda del préstamo.";
+    hide(weekFieldWrap);
   }
 
   if (type === "salary") {
@@ -828,7 +875,6 @@ async function saveAction() {
 
   const amount = Number(actionAmount?.value || 0);
   const note = actionNote?.value.trim() || "";
-  const week = actionWeek?.value.trim() || getCurrentWeekLabel();
 
   const targetUid = (currentUserDoc?.rol === "admin" && adminViewingUid)
     ? adminViewingUid
@@ -854,6 +900,7 @@ async function saveAction() {
     }
 
     const fin = finSnap.data();
+    const semanaActual = fin.semanaActual || getCurrentWeekLabel();
 
     if (currentAction === "advance") {
       await updateDoc(finRef, {
@@ -863,11 +910,11 @@ async function saveAction() {
 
       await addDoc(collection(db, "movimientos"), {
         uid: targetUid,
-        tipo: "Adelanto",
+        tipo: "Adelanto semanal",
         monto: amount,
-        semana: fin.semanaActual || getCurrentWeekLabel(),
+        semana: semanaActual,
         nota: note || "Adelanto registrado",
-        estado: "aprobado",
+        estado: "activo",
         createdAt: serverTimestamp()
       });
     }
@@ -882,34 +929,33 @@ async function saveAction() {
         uid: targetUid,
         tipo: "Préstamo",
         monto: amount,
-        semana: fin.semanaActual || getCurrentWeekLabel(),
+        semana: semanaActual,
         nota: note || "Préstamo registrado",
-        estado: "aprobado",
+        estado: "activo",
         createdAt: serverTimestamp()
       });
     }
 
     if (currentAction === "payment") {
       const currentDebt = Number(fin.deuda || 0);
-      const newDebt = Math.max(currentDebt - amount, 0);
-      const newPago = Number(fin.pago || 0) + amount;
+      const pago = amount;
+      const newDebt = Math.max(currentDebt - pago, 0);
 
       await updateDoc(finRef, {
         deuda: newDebt,
-        pago: newPago,
+        pago: Number(fin.pago || 0) + pago,
         semanaMarcada: true,
         semanaCotejada: false,
-        semanaActual: week,
         updatedAt: serverTimestamp()
       });
 
       await addDoc(collection(db, "movimientos"), {
         uid: targetUid,
-        tipo: "Pago",
-        monto: amount,
-        semana: week,
-        nota: note || "Pago registrado",
-        estado: "pendiente_cotejo",
+        tipo: "Pago semanal",
+        monto: pago,
+        semana: semanaActual,
+        nota: note || "Pago aplicado a préstamo",
+        estado: "pagado",
         createdAt: serverTimestamp()
       });
     }
@@ -917,7 +963,6 @@ async function saveAction() {
     if (currentAction === "salary") {
       await updateDoc(finRef, {
         sueldo: amount,
-        semanaActual: getCurrentWeekLabel(),
         updatedAt: serverTimestamp()
       });
 
@@ -925,7 +970,7 @@ async function saveAction() {
         uid: targetUid,
         tipo: "Sueldo actualizado",
         monto: amount,
-        semana: getCurrentWeekLabel(),
+        semana: semanaActual,
         nota: note || "Sueldo semanal actualizado",
         estado: "aprobado",
         createdAt: serverTimestamp()
@@ -972,7 +1017,7 @@ onAuthStateChanged(auth, async (user) => {
     currentUserDoc = null;
     currentFinanceDoc = null;
     adminViewingUid = null;
-    amountsVisible = false;
+    amountsVisible = true;
 
     clearSummary();
 
@@ -1073,6 +1118,14 @@ if (markReviewedBtn) {
     const targetUid = adminViewingUid || currentUser?.uid;
     if (!targetUid) return;
     await reviewWeek(targetUid);
+  });
+}
+
+if (closeWeekBtn) {
+  closeWeekBtn.addEventListener("click", async () => {
+    const targetUid = adminViewingUid || currentUser?.uid;
+    if (!targetUid) return;
+    await cerrarSemana(targetUid);
   });
 }
 
