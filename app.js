@@ -22,7 +22,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
 /* =========================================================
-   1) FIREBASE CONFIG
+   FIREBASE CONFIG
 ========================================================= */
 const firebaseConfig = {
   apiKey: "AIzaSyA2NnujJ6mhHGkE96tD5Wu7b9_TqL5xVz8",
@@ -34,7 +34,7 @@ const firebaseConfig = {
 };
 
 /* =========================================================
-   2) CORREOS ADMIN
+   CORREOS ADMIN
 ========================================================= */
 const ADMIN_EMAILS = [
   "gruasmetro1@gmail.com"
@@ -317,7 +317,10 @@ async function loadProfiles() {
    REGISTRO
 ========================================================= */
 async function registerOperator() {
-  if (registerMsg) registerMsg.textContent = "";
+  if (registerMsg) {
+    registerMsg.textContent = "";
+    registerMsg.style.color = "";
+  }
 
   const name = registerName?.value.trim() || "";
   const email = registerEmail?.value.trim().toLowerCase() || "";
@@ -415,54 +418,82 @@ async function logoutUser() {
    CARGA DE PANEL
 ========================================================= */
 async function loadCurrentPanel(uid) {
-  const userSnap = await getDoc(doc(db, "usuarios", uid));
-  const finSnap = await getDoc(doc(db, "finanzas", uid));
+  try {
+    const userRef = doc(db, "usuarios", uid);
+    const finRef = doc(db, "finanzas", uid);
 
-  if (!userSnap.exists() || !finSnap.exists()) return;
+    const userSnap = await getDoc(userRef);
+    const finSnap = await getDoc(finRef);
 
-  currentUserDoc = userSnap.data();
-  currentFinanceDoc = finSnap.data();
+    if (!userSnap.exists()) {
+      alert("No se encontró el usuario en Firestore.");
+      return;
+    }
 
-  if (sessionStatus) {
-    sessionStatus.textContent = currentUserDoc.rol === "admin"
-      ? "Admin"
-      : currentUserDoc.nombre;
+    if (!finSnap.exists()) {
+      await setDoc(finRef, {
+        uid,
+        sueldo: 0,
+        adelantos: 0,
+        pago: 0,
+        deuda: 0,
+        semanaMarcada: false,
+        semanaCotejada: false,
+        semanaActual: getCurrentWeekLabel(),
+        updatedAt: serverTimestamp()
+      });
+    }
+
+    const newUserSnap = await getDoc(userRef);
+    const newFinSnap = await getDoc(finRef);
+
+    currentUserDoc = newUserSnap.data();
+    currentFinanceDoc = newFinSnap.data();
+
+    if (sessionStatus) {
+      sessionStatus.textContent = currentUserDoc.rol === "admin"
+        ? "Admin"
+        : currentUserDoc.nombre;
+    }
+
+    if (panelTitle) {
+      panelTitle.textContent = `PANEL DE ${currentUserDoc.nombre.toUpperCase()}`;
+    }
+
+    if (panelSubtitle) {
+      panelSubtitle.textContent = currentUserDoc.rol === "admin"
+        ? "Control general y edición administrativa"
+        : "Vista general de tu información financiera";
+    }
+
+    if (secureSessionText) {
+      secureSessionText.textContent = currentUserDoc.rol === "admin"
+        ? "🔐 Sesión segura (Admin)"
+        : "🔒 Sesión segura";
+    }
+
+    hide(publicPanel);
+    show(personalPanel);
+    show(logoutBtn);
+    setSummary(currentFinanceDoc);
+
+    document.querySelectorAll(".admin-only").forEach(el => {
+      if (currentUserDoc.rol === "admin") show(el);
+      else hide(el);
+    });
+
+    if (currentUserDoc.rol === "admin") {
+      show(adminPanel);
+      await loadAdminOperators();
+    } else {
+      hide(adminPanel);
+    }
+
+    await loadActivity(uid);
+  } catch (error) {
+    console.error("Error cargando panel:", error);
+    alert("No se pudo cargar el panel. Revisa la consola.");
   }
-
-  if (panelTitle) {
-    panelTitle.textContent = `PANEL DE ${currentUserDoc.nombre.toUpperCase()}`;
-  }
-
-  if (panelSubtitle) {
-    panelSubtitle.textContent = currentUserDoc.rol === "admin"
-      ? "Control general y edición administrativa"
-      : "Vista general de tu información financiera";
-  }
-
-  if (secureSessionText) {
-    secureSessionText.textContent = currentUserDoc.rol === "admin"
-      ? "🔐 Sesión segura (Admin)"
-      : "🔒 Sesión segura";
-  }
-
-  hide(publicPanel);
-  show(personalPanel);
-  show(logoutBtn);
-  setSummary(currentFinanceDoc);
-
-  document.querySelectorAll(".admin-only").forEach(el => {
-    if (currentUserDoc.rol === "admin") show(el);
-    else hide(el);
-  });
-
-  if (currentUserDoc.rol === "admin") {
-    show(adminPanel);
-    await loadAdminOperators();
-  } else {
-    hide(adminPanel);
-  }
-
-  await loadActivity(uid);
 }
 
 async function loadActivity(uid) {
@@ -609,20 +640,44 @@ async function loadAdminOperators() {
 }
 
 async function openAdminView(uid) {
-  const userSnap = await getDoc(doc(db, "usuarios", uid));
-  const finSnap = await getDoc(doc(db, "finanzas", uid));
+  try {
+    const userSnap = await getDoc(doc(db, "usuarios", uid));
+    const finRef = doc(db, "finanzas", uid);
+    const finSnap = await getDoc(finRef);
 
-  if (!userSnap.exists() || !finSnap.exists()) return;
+    if (!userSnap.exists()) return;
 
-  const user = userSnap.data();
-  const fin = finSnap.data();
+    if (!finSnap.exists()) {
+      await setDoc(finRef, {
+        uid,
+        sueldo: 0,
+        adelantos: 0,
+        pago: 0,
+        deuda: 0,
+        semanaMarcada: false,
+        semanaCotejada: false,
+        semanaActual: getCurrentWeekLabel(),
+        updatedAt: serverTimestamp()
+      });
+    }
 
-  if (panelTitle) panelTitle.textContent = `ADMIN VIENDO: ${user.nombre.toUpperCase()}`;
-  if (panelSubtitle) panelSubtitle.textContent = `Operador: ${user.email}`;
-  currentFinanceDoc = fin;
+    const newFinSnap = await getDoc(finRef);
+    const user = userSnap.data();
+    const fin = newFinSnap.data();
 
-  setSummary(fin);
-  await loadActivity(uid);
+    if (panelTitle) panelTitle.textContent = `ADMIN VIENDO: ${user.nombre.toUpperCase()}`;
+    if (panelSubtitle) panelSubtitle.textContent = `Operador: ${user.email}`;
+    currentFinanceDoc = fin;
+
+    hide(publicPanel);
+    show(personalPanel);
+    show(logoutBtn);
+
+    setSummary(fin);
+    await loadActivity(uid);
+  } catch (error) {
+    console.error("Error abriendo panel admin:", error);
+  }
 }
 
 async function reviewWeek(uid) {
@@ -913,7 +968,10 @@ onAuthStateChanged(auth, async (user) => {
 ========================================================= */
 if (openRegisterBtn) {
   openRegisterBtn.addEventListener("click", () => {
-    if (registerMsg) registerMsg.textContent = "";
+    if (registerMsg) {
+      registerMsg.textContent = "";
+      registerMsg.style.color = "";
+    }
     openModal(registerModal);
   });
 }
