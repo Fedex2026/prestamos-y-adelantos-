@@ -1313,4 +1313,10 @@ try {
 } catch (error) {
   console.error("Error al iniciar app:", error);
 }
-
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js")
+      .then(() => console.log("SW activo"))
+      .catch((err) => console.log("Error SW", err));
+  });
+}
