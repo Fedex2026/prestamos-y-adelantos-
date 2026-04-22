@@ -1,6 +1,6 @@
 {
   "name": "Préstamos y Adelantos Metro",
-  "short_name": "Préstamos Metro",
+  "short_name": "Préstamos",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#07111f",
