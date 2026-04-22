@@ -136,6 +136,11 @@ const btnPersonas = document.getElementById("btnPersonas");
 const btnReportes = document.getElementById("btnReportes");
 const btnConfig = document.getElementById("btnConfig");
 
+/* botones dentro del panel Solicitudes */
+const solAdvanceBtn = document.getElementById("solAdvanceBtn");
+const solLoanBtn = document.getElementById("solLoanBtn");
+const solPayBtn = document.getElementById("solPayBtn");
+
 const menuButtons = [
   btnInicio,
   btnPanel,
@@ -196,11 +201,11 @@ function hide(el) {
 }
 
 function openModal(el) {
-  show(el);
+  if (el) show(el);
 }
 
 function closeModal(el) {
-  hide(el);
+  if (el) hide(el);
 }
 
 function hideAllMainPanels() {
@@ -289,6 +294,9 @@ function escapeHtml(str = "") {
     .replaceAll("'", "&#039;");
 }
 
+/* =========================================================
+   AUTO CREAR DOCS
+========================================================= */
 async function ensureUserDoc(user) {
   if (!user) return null;
 
@@ -325,7 +333,10 @@ async function ensureUserDoc(user) {
   const data = userSnap.data();
 
   if (isAdmin(user.email || "") && data.rol !== "admin") {
-    await updateDoc(userRef, { rol: "admin", email: user.email || data.email || "" });
+    await updateDoc(userRef, {
+      rol: "admin",
+      email: user.email || data.email || ""
+    });
     userSnap = await getDoc(userRef);
   }
 
@@ -1278,6 +1289,19 @@ if (reloadOperatorsBtn) {
 
 if (searchOperatorInput) {
   searchOperatorInput.addEventListener("input", loadAdminOperators);
+}
+
+/* botones del panel Solicitudes */
+if (solAdvanceBtn) {
+  solAdvanceBtn.addEventListener("click", () => openAction("advance"));
+}
+
+if (solLoanBtn) {
+  solLoanBtn.addEventListener("click", () => openAction("loan"));
+}
+
+if (solPayBtn) {
+  solPayBtn.addEventListener("click", () => openAction("payment"));
 }
 
 /* =========================================================
