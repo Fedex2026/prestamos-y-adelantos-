@@ -35,15 +35,15 @@
 
     <div class="layout">
       <aside class="sidebar">
-        <div class="menu-item active">🏠 Inicio</div>
-        <div class="menu-item">👤 Mi Panel</div>
-        <div class="menu-item">🕘 Historial</div>
-        <div class="menu-item">📝 Solicitudes</div>
+        <div class="menu-item active" id="btnInicio">🏠 Inicio</div>
+        <div class="menu-item" id="btnPanel">👤 Mi Panel</div>
+        <div class="menu-item" id="btnHistorial">🕘 Historial</div>
+        <div class="menu-item" id="btnSolicitudes">📝 Solicitudes</div>
 
         <div class="menu-title">ADMINISTRACIÓN</div>
-        <div class="menu-item">👥 Personas</div>
-        <div class="menu-item">📊 Reportes</div>
-        <div class="menu-item">⚙ Configuración</div>
+        <div class="menu-item" id="btnPersonas">👥 Personas</div>
+        <div class="menu-item" id="btnReportes">📊 Reportes</div>
+        <div class="menu-item" id="btnConfig">⚙ Configuración</div>
 
         <div class="privacy-card">
           <h3>Tu información</h3>
@@ -184,7 +184,7 @@
 
                 <button class="action-card blue-card" id="payDebtBtn">
                   <span>Registrar pago</span>
-                  <small>Bajar deuda del préstamo</small>
+                  <small>Pago aplicado a deuda</small>
                 </button>
 
                 <button class="action-card cyan-card hidden admin-only" id="updateSalaryBtn">
@@ -210,9 +210,9 @@
             </div>
 
             <div class="box">
-              <div class="box-title">🕘 ACTIVIDAD RECIENTE</div>
-              <div id="activityList" class="activity-list">
-                <div class="empty-state">Inicia sesión para ver actividad.</div>
+              <div class="box-title">🕘 HISTORIAL</div>
+              <div class="summary-footer">
+                <button class="btn btn-outline full" id="openHistoryBtn">Ver historial completo</button>
               </div>
             </div>
           </div>
@@ -231,6 +231,70 @@
           </div>
 
           <div id="adminOperatorsList" class="admin-operators-list"></div>
+        </section>
+
+        <!-- SOLICITUDES -->
+        <section class="panel hidden" id="solicitudesPanel">
+          <div class="panel-header">
+            <h2>SOLICITUDES</h2>
+            <p>Consulta rápida de adelantos, pagos y préstamos.</p>
+          </div>
+
+          <div class="dashboard-grid">
+            <div class="box">
+              <div class="box-title">Acciones disponibles</div>
+              <div class="actions-grid">
+                <button class="action-card green-card" id="requestAdvanceBtnClone">
+                  <span>Solicitar adelanto</span>
+                  <small>Registrar adelanto semanal</small>
+                </button>
+
+                <button class="action-card purple-card" id="requestLoanBtnClone">
+                  <span>Solicitar préstamo</span>
+                  <small>Registrar préstamo</small>
+                </button>
+
+                <button class="action-card blue-card" id="payDebtBtnClone">
+                  <span>Registrar pago</span>
+                  <small>Bajar deuda del préstamo</small>
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- REPORTES -->
+        <section class="panel hidden" id="reportesPanel">
+          <div class="panel-header">
+            <h2>REPORTES</h2>
+            <p>Vista rápida de la situación financiera actual.</p>
+          </div>
+
+          <div class="dashboard-grid">
+            <div class="box">
+              <div class="box-title">Resumen</div>
+              <div class="summary-list">
+                <div class="summary-row"><div class="summary-label">Aquí después podemos meter reportes más avanzados.</div></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- CONFIG -->
+        <section class="panel hidden" id="configPanel">
+          <div class="panel-header">
+            <h2>CONFIGURACIÓN</h2>
+            <p>Ajustes del sistema.</p>
+          </div>
+
+          <div class="dashboard-grid">
+            <div class="box">
+              <div class="box-title">Configuración básica</div>
+              <div class="summary-list">
+                <div class="summary-row"><div class="summary-label">Más adelante aquí metemos opciones extras.</div></div>
+              </div>
+            </div>
+          </div>
         </section>
       </main>
     </div>
@@ -318,6 +382,22 @@
       </div>
 
       <div class="modal-msg" id="actionMsg"></div>
+    </div>
+  </div>
+
+  <!-- MODAL HISTORIAL -->
+  <div class="modal hidden" id="historyModal">
+    <div class="modal-card history-modal-card">
+      <h3>Historial completo</h3>
+      <p>Movimientos registrados del operador.</p>
+
+      <div id="activityList" class="activity-list">
+        <div class="empty-state">No hay historial disponible.</div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn btn-outline" id="closeHistoryBtn">Cerrar</button>
+      </div>
     </div>
   </div>
 
