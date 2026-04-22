@@ -37,7 +37,7 @@ const firebaseConfig = {
    2) PON AQUÍ TU CORREO DE ADMIN
 ========================================================= */
 const ADMIN_EMAILS = [
-  "tu_correo_admin@ejemplo.com"
+  "gruasmetro1@gmail.com"
 ];
 
 /* =========================================================
